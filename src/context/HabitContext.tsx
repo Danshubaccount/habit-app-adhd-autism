@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Habit, HabitContextType } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
+import { useAuth } from './AuthContext';
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
@@ -17,10 +18,15 @@ interface HabitProviderProps {
 }
 
 export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
-    const [habits, setHabits] = useLocalStorage<Habit[]>('habits', []);
-    const [isEmergencyMode, setIsEmergencyMode] = useLocalStorage<boolean>('emergencyMode', false);
-    const [xp, setXp] = useLocalStorage<number>('xp', 0);
+    const { currentUser } = useAuth();
+    const userId = currentUser ? currentUser.id : 'guest';
+
+    // Namespace data by User ID
+    const [habits, setHabits] = useLocalStorage<Habit[]>(`habits_${userId}`, []);
+    const [isEmergencyMode, setIsEmergencyMode] = useLocalStorage<boolean>(`emergencyMode_${userId}`, false);
+    const [xp, setXp] = useLocalStorage<number>(`xp_${userId}`, 0);
     const [level, setLevel] = useState(1);
+    const [categories, setCategories] = useLocalStorage<string[]>(`categories_${userId}`, ['Health', 'Work', 'Mindfulness', 'Social', 'Other']);
 
     useEffect(() => {
         setLevel(Math.floor(xp / 100) + 1);
@@ -30,6 +36,12 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
         setXp(prev => prev + amount);
     };
 
+    const addCategory = (category: string) => {
+        if (!categories.includes(category)) {
+            setCategories([...categories, category]);
+        }
+    };
+
     const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak' | 'completedDates'>) => {
         const newHabit: Habit = {
             ...habitData,
@@ -37,9 +49,26 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
             completedDates: [],
             streak: 0,
             createdAt: new Date().toISOString(),
+            frequency: habitData.frequency || 7, // Default to daily if not specified
+            period: habitData.period || 'week',
         };
         setHabits([...habits, newHabit]);
         addXp(50); // XP for creating a habit
+    };
+
+    const getWeeklyProgress = (completedDates: string[]) => {
+        if (!completedDates || completedDates.length === 0) return 0;
+
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        // Set to previous Sunday (or Monday depending on preference, standard getDay() returns 0 for Sunday)
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        return completedDates.filter(date => {
+            const d = new Date(date);
+            return d >= startOfWeek;
+        }).length;
     };
 
     const calculateStreak = (dates: string[]): number => {
@@ -119,7 +148,10 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
             isEmergencyMode,
             toggleEmergencyMode,
             xp,
-            level
+            level,
+            getWeeklyProgress,
+            categories,
+            addCategory
         }}>
             {children}
         </HabitContext.Provider>

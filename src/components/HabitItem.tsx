@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { Habit } from '../types';
+import { useHabitContext } from '../context/HabitContext';
+import tibetanBellSound from '../assets/tibetan-bell.mp3';
 
 interface HabitItemProps {
     habit: Habit;
@@ -9,6 +11,21 @@ interface HabitItemProps {
 }
 
 const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle, onDelete, isCompletedToday }) => {
+    const { getWeeklyProgress } = useHabitContext();
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    useEffect(() => {
+        audioRef.current = new Audio(tibetanBellSound);
+    }, []);
+
+    const handleToggle = () => {
+        if (!isCompletedToday && audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(e => console.error("Error playing sound:", e));
+        }
+        onToggle(habit.id);
+    };
+
     return (
         <div
             className={`habit-item ${isCompletedToday ? 'habit-item--completed' : ''} ${habit.isCritical ? 'habit-item--critical' : ''}`}
@@ -16,16 +33,7 @@ const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle, onDelete, isComp
             <div className="habit-item-header">
                 <div style={{ flex: 1 }}>
                     <div className="habit-meta">
-                        <span className="habit-tag" style={{
-                            backgroundColor:
-                                habit.category === 'health' ? '#fee2e2' :
-                                    habit.category === 'work' ? '#dbeafe' :
-                                        habit.category === 'mindfulness' ? '#f3e8ff' : '#f3f4f6',
-                            color:
-                                habit.category === 'health' ? '#991b1b' :
-                                    habit.category === 'work' ? '#1e40af' :
-                                        habit.category === 'mindfulness' ? '#6b21a8' : '#374151',
-                        }}>
+                        <span className={`habit-tag ${habit.category}`}>
                             {habit.category}
                         </span>
                         {habit.isCritical && (
@@ -35,6 +43,9 @@ const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle, onDelete, isComp
 
                     <h3 className="habit-title">
                         {habit.title}
+                        <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: 'var(--text-secondary)', marginLeft: '0.5rem' }}>
+                            ({getWeeklyProgress(habit.completedDates)}/{habit.frequency || 7}/wk)
+                        </span>
                     </h3>
 
                     <div className="habit-details">
@@ -56,7 +67,7 @@ const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle, onDelete, isComp
                     </div>
 
                     <button
-                        onClick={() => onToggle(habit.id)}
+                        onClick={handleToggle}
                         className="toggle-btn"
                         aria-label={isCompletedToday ? "Mark not completed" : "Mark completed"}
                     >

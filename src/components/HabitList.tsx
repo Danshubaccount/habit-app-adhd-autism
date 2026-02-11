@@ -32,42 +32,51 @@ const HabitList: React.FC = () => {
 
     return (
         <div>
-            <header>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <header className="glass-panel" style={{ textAlign: 'center', padding: '1.5rem', borderRadius: '24px', marginBottom: '2rem' }}>
+                <div style={{ marginBottom: '1rem' }}>
+                    <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: '0 0 0.5rem 0' }}>
+                        Hello, <span style={{ color: 'var(--primary-color)' }}>Friend!</span>
+                    </h1>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
+                        {isEmergencyMode
+                            ? "Take a deep breath. Just the essentials today."
+                            : "You are becoming 1% better every day."}
+                    </p>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>
                     <div>
-                        <h1 style={{ fontSize: '1.75rem', fontWeight: 900, margin: 0 }}>
-                            Structure <span style={{ color: 'var(--primary-color)' }}>Builder</span>
-                        </h1>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                            {isEmergencyMode
-                                ? "Only the essentials."
-                                : "Building systems, one atom at a time."}
-                        </p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--primary-color)', lineHeight: 1 }}>
-                            LVL {level || 1}
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary-color)' }}>
+                            {level || 1}
                         </div>
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                            {xp || 0} XP
+                            Level
+                        </div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary-color)' }}>
+                            {xp || 0}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                            XP
                         </div>
                     </div>
                 </div>
 
-                <div className="progress-track">
+                <div className="progress-track" style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
                     <div
                         className="progress-fill"
                         style={{ width: `${progress}%` }}
                     ></div>
                 </div>
-                <p style={{ textAlign: 'right', fontSize: '0.75rem', marginTop: '0.25rem', color: 'var(--text-secondary)' }}>
+                <p style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
                     {progress}% Completed
                 </p>
             </header>
 
             <div>
                 {sortedHabits.length === 0 ? (
-                    <div style={{
+                    <div className="glass-panel" style={{
                         textAlign: 'center',
                         padding: '3rem',
                         border: '2px dashed var(--border-color)',
@@ -92,6 +101,14 @@ const HabitList: React.FC = () => {
                         />
                     ))
                 )}
+            </div>
+
+            <div className="glass-panel" style={{ marginTop: '4rem', textAlign: 'center', padding: '1.5rem', borderRadius: '24px' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>What this means to you</h4>
+                <p style={{ fontSize: '0.9rem', maxWidth: '480px', margin: '0 auto', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                    Every habit you complete is a vote for the person you wish to become.
+                    You aren't just ticking a box; you are proving to yourself that you can trust yourself.
+                </p>
             </div>
         </div>
     );

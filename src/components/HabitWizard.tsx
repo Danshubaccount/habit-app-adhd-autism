@@ -3,15 +3,18 @@ import { useHabitContext } from '../context/HabitContext';
 import type { HabitCategory } from '../types';
 
 const HabitWizard: React.FC = () => {
-    const { addHabit } = useHabitContext();
+    const { addHabit, categories, addCategory } = useHabitContext();
     const [isOpen, setIsOpen] = useState(false);
     const [step, setStep] = useState(1);
+    const [newCategory, setNewCategory] = useState('');
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
 
     const [title, setTitle] = useState('');
     const [cue, setCue] = useState('');
     const [routine, setRoutine] = useState('');
     const [reward, setReward] = useState('');
-    const [category, setCategory] = useState<HabitCategory>('health');
+    const [category, setCategory] = useState<HabitCategory>('Health');
+    const [frequency, setFrequency] = useState(1);
     const [isCritical, setIsCritical] = useState(false);
 
     const reset = () => {
@@ -19,7 +22,10 @@ const HabitWizard: React.FC = () => {
         setCue('');
         setRoutine('');
         setReward('');
-        setCategory('health');
+        setCategory(categories[0] || 'Health');
+        setIsAddingCategory(false);
+        setNewCategory('');
+        setFrequency(1);
         setIsCritical(false);
         setStep(1);
     };
@@ -37,6 +43,7 @@ const HabitWizard: React.FC = () => {
             routine,
             reward,
             category,
+            frequency,
             isCritical
         });
         handleClose();
@@ -45,15 +52,7 @@ const HabitWizard: React.FC = () => {
     const nextStep = () => setStep(s => s + 1);
     const prevStep = () => setStep(s => s - 1);
 
-    // Quick Templates
-    const applyTemplate = (tTitle: string, tCue: string, tRoutine: string, tReward: string, tCat: HabitCategory) => {
-        setTitle(tTitle);
-        setCue(tCue);
-        setRoutine(tRoutine);
-        setReward(tReward);
-        setCategory(tCat);
-        setStep(4); // Skip to review
-    };
+
 
     if (!isOpen) {
         return (
@@ -102,23 +101,7 @@ const HabitWizard: React.FC = () => {
                             />
                         </div>
 
-                        <div style={{ marginTop: '2rem' }}>
-                            <p className="detail-label" style={{ marginBottom: '0.5rem' }}>Or choose a quick start:</p>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                                <button className="btn btn-secondary" onClick={() => applyTemplate("Drink Water", "When I sit at my desk", "Drink a glass of water", "Feel refreshed", "health")}>
-                                    💧 Hydrate
-                                </button>
-                                <button className="btn btn-secondary" onClick={() => applyTemplate("Read", "Before bed", "Read 1 page", "Relax", "mindfulness")}>
-                                    📚 Read
-                                </button>
-                                <button className="btn btn-secondary" onClick={() => applyTemplate("Walk", "After lunch", "Walk for 5 mins", "Listen to music", "health")}>
-                                    yx Walk
-                                </button>
-                                <button className="btn btn-secondary" onClick={() => applyTemplate("Meds", "With morning coffee", "Take meds", "Check health app", "health")}>
-                                    💊 Meds
-                                </button>
-                            </div>
-                        </div>
+
 
                         <div className="form-actions">
                             <button onClick={handleClose} className="btn btn-secondary">Cancel</button>
@@ -182,18 +165,81 @@ const HabitWizard: React.FC = () => {
                         </div>
 
                         <div className="form-group">
+                            <label className="form-label">Weekly Target (Times per week)</label>
+                            <input
+                                type="number"
+                                min="1"
+                                max="7"
+                                value={frequency}
+                                onChange={e => setFrequency(parseInt(e.target.value))}
+                                className="form-input"
+                            />
+                        </div>
+
+                        <div className="form-group">
                             <label className="form-label">Category</label>
-                            <select
-                                value={category}
-                                onChange={e => setCategory(e.target.value as HabitCategory)}
-                                className="form-select"
-                            >
-                                <option value="health">Health</option>
-                                <option value="work">Work</option>
-                                <option value="mindfulness">Mindfulness</option>
-                                <option value="social">Social</option>
-                                <option value="other">Other</option>
-                            </select>
+                            {!isAddingCategory ? (
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <select
+                                        value={category}
+                                        onChange={e => setCategory(e.target.value)}
+                                        className="form-select"
+                                        style={{ flex: 1 }}
+                                    >
+                                        {categories.map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsAddingCategory(true)}
+                                        className="btn btn-secondary"
+                                        style={{ padding: '0 0.75rem', fontSize: '1.25rem', lineHeight: 1 }}
+                                        title="Add New Category"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <input
+                                        type="text"
+                                        value={newCategory}
+                                        onChange={e => setNewCategory(e.target.value)}
+                                        placeholder="New Category Name"
+                                        className="form-input"
+                                        style={{ flex: 1 }}
+                                        autoFocus
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (newCategory.trim()) {
+                                                const formattedCategory = newCategory.trim();
+                                                addCategory(formattedCategory);
+                                                setCategory(formattedCategory);
+                                                setNewCategory('');
+                                                setIsAddingCategory(false);
+                                            }
+                                        }}
+                                        className="btn btn-primary"
+                                        style={{ padding: '0 0.75rem' }}
+                                    >
+                                        ✓
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsAddingCategory(false);
+                                            setNewCategory('');
+                                        }}
+                                        className="btn btn-secondary"
+                                        style={{ padding: '0 0.75rem' }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-actions">
@@ -213,6 +259,7 @@ const HabitWizard: React.FC = () => {
                             <p><strong>When:</strong> {cue}</p>
                             <p><strong>Do:</strong> {routine}</p>
                             <p><strong>Get:</strong> {reward}</p>
+                            <p><strong>Target:</strong> {frequency} / week</p>
                         </div>
 
                         <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', cursor: 'pointer' }}>

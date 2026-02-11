@@ -3,12 +3,15 @@ import { useHabitContext } from '../context/HabitContext';
 import type { HabitCategory } from '../types';
 
 const HabitForm: React.FC = () => {
-    const { addHabit } = useHabitContext();
+    const { addHabit, categories, addCategory } = useHabitContext();
     const [title, setTitle] = useState('');
     const [cue, setCue] = useState('');
     const [routine, setRoutine] = useState('');
     const [reward, setReward] = useState('');
-    const [category, setCategory] = useState<HabitCategory>('health');
+    const [category, setCategory] = useState<HabitCategory>('Health');
+    const [newCategory, setNewCategory] = useState('');
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [frequency, setFrequency] = useState(1);
     const [isCritical, setIsCritical] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -22,6 +25,7 @@ const HabitForm: React.FC = () => {
             routine,
             reward,
             category,
+            frequency,
             isCritical
         });
 
@@ -30,7 +34,10 @@ const HabitForm: React.FC = () => {
         setCue('');
         setRoutine('');
         setReward('');
-        setCategory('health');
+        setCategory(categories[0] || 'Health');
+        setIsAddingCategory(false);
+        setNewCategory('');
+        setFrequency(1);
         setIsCritical(false);
         setIsOpen(false);
     };
@@ -104,17 +111,80 @@ const HabitForm: React.FC = () => {
                     <div className="form-row">
                         <div style={{ flex: 1 }}>
                             <label className="form-label">Category</label>
-                            <select
-                                value={category}
-                                onChange={e => setCategory(e.target.value as HabitCategory)}
-                                className="form-select"
-                            >
-                                <option value="health">Health</option>
-                                <option value="work">Work</option>
-                                <option value="mindfulness">Mindfulness</option>
-                                <option value="social">Social</option>
-                                <option value="other">Other</option>
-                            </select>
+                            {!isAddingCategory ? (
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <select
+                                        value={category}
+                                        onChange={e => setCategory(e.target.value)}
+                                        className="form-select"
+                                        style={{ flex: 1 }}
+                                    >
+                                        {categories.map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsAddingCategory(true)}
+                                        className="btn btn-secondary"
+                                        style={{ padding: '0 0.75rem', fontSize: '1.25rem', lineHeight: 1 }}
+                                        title="Add New Category"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <input
+                                        type="text"
+                                        value={newCategory}
+                                        onChange={e => setNewCategory(e.target.value)}
+                                        placeholder="New Category Name"
+                                        className="form-input"
+                                        style={{ flex: 1 }}
+                                        autoFocus
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (newCategory.trim()) {
+                                                const formattedCategory = newCategory.trim();
+                                                addCategory(formattedCategory);
+                                                setCategory(formattedCategory);
+                                                setNewCategory('');
+                                                setIsAddingCategory(false);
+                                            }
+                                        }}
+                                        className="btn btn-primary"
+                                        style={{ padding: '0 0.75rem' }}
+                                    >
+                                        ✓
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsAddingCategory(false);
+                                            setNewCategory('');
+                                        }}
+                                        className="btn btn-secondary"
+                                        style={{ padding: '0 0.75rem' }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        <div style={{ flex: 1, marginLeft: '1rem' }}>
+                            <label className="form-label">Weekly Target</label>
+                            <input
+                                type="number"
+                                min="1"
+                                max="7"
+                                value={frequency}
+                                onChange={e => setFrequency(parseInt(e.target.value))}
+                                className="form-input"
+                                required
+                            />
                         </div>
                     </div>
 
