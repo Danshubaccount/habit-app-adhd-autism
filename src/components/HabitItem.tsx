@@ -28,7 +28,7 @@ const HabitItem: React.FC<HabitItemProps> = ({ habit, onToggle, onDelete, isComp
 
     return (
         <div
-            className={`habit-item ${isCompletedToday ? 'habit-item--completed' : ''} ${habit.isCritical ? 'habit-item--critical' : ''}`}
+            className={`habit-item glass-panel ${isCompletedToday ? 'habit-item--completed' : ''} ${habit.isCritical ? 'habit-item--critical' : ''}`}
         >
             <div className="habit-item-header">
                 <div style={{ flex: 1 }}>
