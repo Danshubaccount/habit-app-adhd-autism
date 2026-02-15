@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Lock, Sparkles } from 'lucide-react';
 import { useHabitContext } from '../context/HabitContext';
 import useLocalStorage from '../hooks/useLocalStorage';
 
@@ -30,28 +31,35 @@ const DailyReward: React.FC = () => {
             const newIndex = Math.floor(Math.random() * QUOTES.length);
             setQuoteIndex(newIndex);
             setUnlockedDate(today);
-            setIsRevealed(true);
+            setTimeout(() => setIsRevealed(true), 0);
         } else if (unlockedDate === today) {
-            setIsRevealed(true);
+            setTimeout(() => setIsRevealed(true), 0);
         } else {
-            setIsRevealed(false);
+            setTimeout(() => setIsRevealed(false), 0);
         }
     }, [completedToday, unlockedDate, today, setQuoteIndex, setUnlockedDate]);
 
     return (
-        <div className={`daily-reward-card glass-panel ${isRevealed ? 'revealed' : 'locked'}`}>
-            <div className="reward-content">
+        <div className={`daily-reward-card glass-panel ${isRevealed ? 'revealed' : 'locked'}`} style={{
+            padding: '1.5rem 2rem',
+            marginBottom: '3rem',
+            textAlign: 'center',
+            width: '100%',
+            boxSizing: 'border-box',
+            borderRadius: 'var(--radius-lg)'
+        }}>
+            <div className="reward-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
                 {isRevealed ? (
                     <>
-                        <div className="reward-icon">🌟</div>
-                        <h3>Daily Wisdom</h3>
-                        <p>"{QUOTES[quoteIndex]}"</p>
+                        <Sparkles size={40} color="var(--primary-text)" />
+                        <h3 style={{ margin: 0, color: 'var(--primary-text)', fontWeight: 800 }}>Daily Wisdom</h3>
+                        <p style={{ margin: 0, fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text-primary)' }}>"{QUOTES[quoteIndex]}"</p>
                     </>
                 ) : (
                     <>
-                        <div className="reward-icon">🔒</div>
-                        <h3>Daily Reward Locked</h3>
-                        <p>Complete 1 habit to unlock today's boost!</p>
+                        <Lock size={40} color="var(--text-muted)" />
+                        <h3 style={{ margin: 0, color: 'var(--text-secondary)' }}>Daily Reward Locked</h3>
+                        <p style={{ margin: 0, color: 'var(--text-muted)' }}>Complete 1 habit to unlock today's boost!</p>
                     </>
                 )}
             </div>

@@ -11,6 +11,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Font Families */
+  --font-serif: 'Playfair Display', serif;
+  --font-accent: 'Cormorant Garamond', serif;
+  --font-sans: 'Outfit', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
 }
 
 a {
@@ -28,10 +34,76 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  background-color: var(--bg-color);
+  background-color: #0c1218;
   color: var(--text-primary);
   font-family: var(--font-family);
   overflow-x: hidden;
+  --grad-1: rgba(13, 31, 26, 0.6);
+  --grad-2: rgba(22, 45, 38, 0.4);
+  --grad-3: rgba(0, 0, 0, 0.8);
+}
+
+/* Base Mesh Gradient Layer */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background:
+    radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--grad-1) 0%, transparent 60%),
+    radial-gradient(circle at 20% 30%, var(--grad-2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, var(--grad-2) 10%, transparent 50%),
+    var(--grad-3);
+  background-size: 200% 200%;
+  animation: breathingGradient 15s ease-in-out infinite alternate;
+  transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes breathingGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+/* Texture Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Theme Palettes */
+.theme-home {
+  --grad-1: rgba(20, 100, 80, 0.3);
+  --grad-2: rgba(10, 50, 40, 0.5);
+  --grad-3: #0a1f1a;
+}
+
+.theme-goals {
+  --grad-1: rgba(255, 140, 0, 0.15);
+  --grad-2: rgba(139, 69, 19, 0.3);
+  --grad-3: #1a0f0a;
+}
+
+.theme-journal,
+.theme-mindfulness {
+  --grad-1: rgba(147, 112, 219, 0.15);
+  --grad-2: rgba(72, 61, 139, 0.3);
+  --grad-3: #0f0a1a;
 }
 
 #root {
@@ -85,16 +157,16 @@ button:focus-visible {
 
 /* Glassmorphism Effect */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   .glass-panel {
-    background: rgba(30, 30, 30, 0.6);
+    background: rgba(20, 20, 20, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 }
@@ -201,7 +273,7 @@ button:focus-visible {
   position: sticky;
   bottom: 1rem;
   float: right;
-  margin-top: -3rem;
+  margin-bottom: 2rem;
   margin-right: 1rem;
   z-index: 10;
   animation: fadeInUp 0.3s ease-in-out;
@@ -247,4 +319,29 @@ button:focus-visible {
     width: 100%;
     max-width: 100%;
   }
+}
+
+/* Typography Animations */
+@keyframes titleEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-title {
+  animation: titleEntrance 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-subtitle {
+  animation: titleEntrance 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+  opacity: 0;
+  /* Handled by animation */
 }

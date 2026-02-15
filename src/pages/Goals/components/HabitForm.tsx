@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useHabitContext } from '../context/HabitContext';
-import type { HabitCategory } from '../types';
+import { useHabitContext } from '../../../context/HabitContext';
+import type { HabitCategory } from '../../../types';
 
 const HabitForm: React.FC = () => {
     const { addHabit, categories, addCategory } = useHabitContext();

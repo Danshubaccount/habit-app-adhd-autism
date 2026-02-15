@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Habit, HabitContextType } from '../types';
+import type { Habit, HabitContextType, Affirmation } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
 
@@ -27,6 +28,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     const [xp, setXp] = useLocalStorage<number>(`xp_${userId}`, 0);
     const [level, setLevel] = useState(1);
     const [categories, setCategories] = useLocalStorage<string[]>(`categories_${userId}`, ['Health', 'Work', 'Mindfulness', 'Social', 'Other']);
+    const [personalAffirmations, setPersonalAffirmations] = useLocalStorage<Affirmation[]>(`personalAffirmations_${userId}`, []);
 
     useEffect(() => {
         setLevel(Math.floor(xp / 100) + 1);
@@ -42,65 +44,84 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
         }
     };
 
-    const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak' | 'completedDates'>) => {
+    const addPersonalAffirmation = (text: string, repeats: number, trigger?: string) => {
+        const newAffirmation: Affirmation = {
+            id: crypto.randomUUID(),
+            text,
+            repeats,
+            trigger,
+            isPersonal: true
+        };
+        setPersonalAffirmations([...personalAffirmations, newAffirmation]);
+    };
+
+    const deletePersonalAffirmation = (id: string) => {
+        setPersonalAffirmations(personalAffirmations.filter(a => a.id !== id));
+    };
+
+    const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak' | 'completedDates' | 'subtasks'> & { subtasks?: string[]; affirmations?: Affirmation[] }) => {
         const newHabit: Habit = {
             ...habitData,
             id: crypto.randomUUID(),
             completedDates: [],
             streak: 0,
             createdAt: new Date().toISOString(),
-            frequency: habitData.frequency || 7, // Default to daily if not specified
+            frequency: habitData.frequency || 7,
             period: habitData.period || 'week',
+            graceDays: habitData.graceDays ?? 1,
+            scaleLevel: habitData.scaleLevel || 'standard',
+            subtasks: (habitData.subtasks || []).map(title => ({
+                id: crypto.randomUUID(),
+                title,
+                completed: false
+            })),
+            affirmations: habitData.affirmations || []
         };
         setHabits([...habits, newHabit]);
-        addXp(50); // XP for creating a habit
+        addXp(50);
     };
 
-    const getWeeklyProgress = (completedDates: string[]) => {
-        if (!completedDates || completedDates.length === 0) return 0;
-
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        // Set to previous Sunday (or Monday depending on preference, standard getDay() returns 0 for Sunday)
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        startOfWeek.setHours(0, 0, 0, 0);
-
-        return completedDates.filter(date => {
-            const d = new Date(date);
-            return d >= startOfWeek;
-        }).length;
+    const updateHabit = (id: string, updates: Partial<Habit>) => {
+        setHabits(prevHabits => prevHabits.map(habit => {
+            if (habit.id !== id) return habit;
+            return {
+                ...habit,
+                ...updates,
+                // Recalculate streak if completedDates or graceDays changed
+                streak: (updates.completedDates || updates.graceDays !== undefined)
+                    ? calculateStreak(updates.completedDates || habit.completedDates, updates.graceDays ?? habit.graceDays)
+                    : habit.streak
+            };
+        }));
     };
 
-    const calculateStreak = (dates: string[]): number => {
+    const calculateStreak = (dates: string[], graceDays: number = 1): number => {
         if (dates.length === 0) return 0;
 
-        const sortedDates = [...dates].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+        const sortedDates = [...new Set(dates)].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
         const today = new Date().toISOString().split('T')[0];
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
         let currentStreak = 0;
-        let expectedDate = today;
+        const lastDate = sortedDates[0];
 
-        // Check if habit was done today
-        if (sortedDates[0] === today) {
-            currentStreak++;
-            expectedDate = yesterday;
-        } else if (sortedDates[0] === yesterday) {
-            // If not done today but done yesterday, streak is still alive
-            expectedDate = yesterday;
-        } else {
-            // Streak broken
-            return 0;
+        // Check if the streak is still alive (done today or yesterday or within grace period)
+        const diffInDays = (date1: string, date2: string) => {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            return Math.floor((d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24));
+        };
+
+        const daysSinceLast = diffInDays(today, lastDate);
+        if (daysSinceLast > graceDays) {
+            return 0; // Streak broken
         }
 
-        // Iterate through past dates
-        for (let i = (sortedDates[0] === today ? 1 : 0); i < sortedDates.length; i++) {
-            if (sortedDates[i] === expectedDate) {
+        currentStreak = 1;
+
+        for (let i = 1; i < sortedDates.length; i++) {
+            const gap = diffInDays(sortedDates[i - 1], sortedDates[i]);
+            if (gap <= graceDays + 1) {
                 currentStreak++;
-                // Move expected date back one day
-                const prevDate = new Date(expectedDate);
-                prevDate.setDate(prevDate.getDate() - 1);
-                expectedDate = prevDate.toISOString().split('T')[0];
             } else {
                 break;
             }
@@ -120,19 +141,78 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
                 newCompletedDates = habit.completedDates.filter(d => d !== date);
             } else {
                 newCompletedDates = [...habit.completedDates, date];
-                if (!isCompleted) addXp(10); // XP for completing a habit
+                if (!isCompleted) addXp(10);
             }
 
             return {
                 ...habit,
                 completedDates: newCompletedDates,
-                streak: calculateStreak(newCompletedDates)
+                streak: calculateStreak(newCompletedDates, habit.graceDays)
             };
         }));
     };
 
+    const updateSubtask = (habitId: string, subtaskId: string, completed: boolean) => {
+        setHabits(prevHabits => prevHabits.map(habit => {
+            if (habit.id !== habitId) return habit;
+
+            const newSubtasks = habit.subtasks.map(st =>
+                st.id === subtaskId ? { ...st, completed } : st
+            );
+
+            const allSubtasksCompleted = newSubtasks.length > 0 && newSubtasks.every(st => st.completed);
+            const today = new Date().toISOString().split('T')[0];
+            const isAlreadyCompletedToday = habit.completedDates.includes(today);
+
+            let newCompletedDates = habit.completedDates;
+            const subtask = habit.subtasks.find(s => s.id === subtaskId);
+            if (completed && subtask && !subtask.completed) {
+                // XP based on scale
+                const xpPerSubtask = habit.scaleLevel === 'mini' ? 1 : habit.scaleLevel === 'ideal' ? 3 : 2;
+                addXp(xpPerSubtask);
+            }
+
+            if (allSubtasksCompleted && !isAlreadyCompletedToday) {
+                newCompletedDates = [...habit.completedDates, today];
+                const bonusXp = habit.scaleLevel === 'mini' ? 3 : habit.scaleLevel === 'ideal' ? 10 : 5;
+                addXp(bonusXp); // Bonus for full completion
+            } else if (!allSubtasksCompleted && isAlreadyCompletedToday) {
+                // If we uncheck a subtask and it was the last one keeping it completed
+                newCompletedDates = habit.completedDates.filter(d => d !== today);
+            }
+
+            return {
+                ...habit,
+                subtasks: newSubtasks,
+                completedDates: newCompletedDates,
+                streak: calculateStreak(newCompletedDates, habit.graceDays)
+            };
+        }));
+    };
+
+    const updateHabitScale = (habitId: string, scaleLevel: 'mini' | 'standard' | 'ideal') => {
+        setHabits(prevHabits => prevHabits.map(habit =>
+            habit.id === habitId ? { ...habit, scaleLevel } : habit
+        ));
+    };
+
     const deleteHabit = (id: string) => {
         setHabits(prevHabits => prevHabits.filter(h => h.id !== id));
+    };
+
+    const getWeeklyProgress = (completedDates: string[]) => {
+        if (!completedDates || completedDates.length === 0) return 0;
+
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        // Set to previous Sunday (or Monday depending on preference, standard getDay() returns 0 for Sunday)
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        return completedDates.filter(date => {
+            const d = new Date(date);
+            return d >= startOfWeek;
+        }).length;
     };
 
     const toggleEmergencyMode = () => {
@@ -143,7 +223,10 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
         <HabitContext.Provider value={{
             habits,
             addHabit,
+            updateHabit,
             toggleHabitCompletion,
+            updateSubtask,
+            updateHabitScale,
             deleteHabit,
             isEmergencyMode,
             toggleEmergencyMode,
@@ -151,7 +234,10 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
             level,
             getWeeklyProgress,
             categories,
-            addCategory
+            addCategory,
+            personalAffirmations,
+            addPersonalAffirmation,
+            deletePersonalAffirmation
         }}>
             {children}
         </HabitContext.Provider>

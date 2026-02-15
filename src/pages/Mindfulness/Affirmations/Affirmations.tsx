@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useHabitContext } from '../../../context/HabitContext';
+import { Sun, Plus, Trash2, Play } from 'lucide-react';
+import tibetanBellSound from '../../../assets/tibetan-bell.mp3';
+import { useMascot } from '../../../context/MascotContext';
+import type { Affirmation } from '../../../types';
 
-type AffirmationPhase = 'theme-selection' | 'active' | 'paused' | 'completed';
-type AffirmationTheme = 'calm' | 'confidence' | 'healing' | 'clarity' | 'strength';
+type AffirmationPhase = 'theme-selection' | 'active' | 'paused' | 'completed' | 'manage-personal';
+type AffirmationTheme = 'calm' | 'confidence' | 'healing' | 'clarity' | 'strength' | 'personal';
 
 interface ThemeOption {
     id: AffirmationTheme;
@@ -12,14 +18,21 @@ interface ThemeOption {
 }
 
 const Affirmations: React.FC = () => {
+    const location = useLocation();
+    const { personalAffirmations, addPersonalAffirmation, deletePersonalAffirmation, habits } = useHabitContext();
+    const { triggerInteraction, updateMascotStreak } = useMascot();
     const [phase, setPhase] = useState<AffirmationPhase>('theme-selection');
     const [selectedTheme, setSelectedTheme] = useState<AffirmationTheme | null>(null);
     const [affirmations, setAffirmations] = useState<string[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [timeInCurrent, setTimeInCurrent] = useState(0);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [newPersonalText, setNewPersonalText] = useState('');
+    const [newPersonalTrigger, setNewPersonalTrigger] = useState('');
+    const [newPersonalRepeats, setNewPersonalRepeats] = useState(3);
     const timerRef = useRef<number | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
+    const audioBufferRef = useRef<AudioBuffer | null>(null);
 
     const AFFIRMATION_DURATION = 10; // seconds per affirmation
 
@@ -58,6 +71,13 @@ const Affirmations: React.FC = () => {
             emoji: '🦁',
             description: 'Cultivate resilience and power',
             color: '#9B59B6'
+        },
+        {
+            id: 'personal',
+            name: 'Personal',
+            emoji: '👤',
+            description: 'Your own custom affirmations',
+            color: 'var(--primary-color)'
         }
     ];
 
@@ -145,57 +165,103 @@ const Affirmations: React.FC = () => {
         ]
     };
 
-    // Initialize Web Audio API
+    // Initialize Web Audio API and load sound
     useEffect(() => {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        return () => {
-            if (audioContextRef.current) {
-                audioContextRef.current.close();
-            }
-        };
-    }, []);
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ctx = new AudioContextClass();
+        audioContextRef.current = ctx;
 
-    // Play peaceful chime sound using Web Audio API
-    const playGentleChime = () => {
-        if (!audioContextRef.current) return;
+        // Load the Tibetan bell sound
+        fetch(tibetanBellSound)
+            .then(res => res.arrayBuffer())
+            .then(data => ctx.decodeAudioData(data))
+            .then(buffer => {
+                audioBufferRef.current = buffer;
+            })
+            .catch(err => console.error("Error loading audio:", err));
+
+        // Check for passed affirmation from goal
+        if (location.state?.affirmation) {
+            const passedAff = location.state.affirmation as Affirmation;
+            startIndividualAffirmation(passedAff);
+        }
+
+        return () => {
+            if (ctx) ctx.close();
+        };
+    }, [location.state]);
+
+    const startIndividualAffirmation = (aff: Affirmation) => {
+        const textToRepeat = aff.trigger ? `When I ${aff.trigger}, I will ${aff.text}` : aff.text;
+        const repeatedLines = Array(aff.repeats).fill(textToRepeat);
+        setAffirmations(repeatedLines);
+        setPhase('active');
+        setCurrentIndex(0);
+        setTimeInCurrent(0);
+        playPeacefulSound();
+    };
+
+    // Play peaceful bell sound
+    const playPeacefulSound = () => {
+        if (!audioContextRef.current || !audioBufferRef.current) return;
 
         const ctx = audioContextRef.current;
-        const now = ctx.currentTime;
+        const source = ctx.createBufferSource();
+        source.buffer = audioBufferRef.current;
 
-        const oscillator = ctx.createOscillator();
         const gainNode = ctx.createGain();
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
 
-        oscillator.connect(gainNode);
+        source.connect(gainNode);
         gainNode.connect(ctx.destination);
-
-        oscillator.frequency.value = 396; // Lower, more peaceful frequency
-        oscillator.type = 'sine';
-
-        // Much softer, more peaceful volume
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(0.08, now + 0.2);
-        gainNode.gain.linearRampToValueAtTime(0.08, now + 1.0);
-        gainNode.gain.linearRampToValueAtTime(0, now + 1.5);
-
-        oscillator.start(now);
-        oscillator.stop(now + 1.2);
+        source.start(0);
     };
 
     // Generate 10 random affirmations from selected theme
     const generateAffirmations = (theme: AffirmationTheme) => {
-        const pool = affirmationPools[theme];
+        if (theme === 'personal') return [];
+        const pool = affirmationPools[theme as keyof typeof affirmationPools];
         const shuffled = [...pool].sort(() => Math.random() - 0.5);
         return shuffled.slice(0, 10);
     };
 
     const selectTheme = (theme: AffirmationTheme) => {
         setSelectedTheme(theme);
+        if (theme === 'personal') {
+            setPhase('manage-personal');
+            return;
+        }
         const generated = generateAffirmations(theme);
         setAffirmations(generated);
         setPhase('active');
         setCurrentIndex(0);
         setTimeInCurrent(0);
-        playGentleChime();
+        playPeacefulSound();
+    };
+
+    const startPersonalSession = () => {
+        // Aggregate personal affirmations and habit-specific affirmations
+        const habitAffirmations = (habits || []).flatMap(h =>
+            (h.affirmations || []).map(aff => ({ ...aff, trigger: aff.trigger || h.cue }))
+        );
+
+        const allAffirmations = [...personalAffirmations, ...habitAffirmations];
+        if (allAffirmations.length === 0) return;
+
+        // Combine all affirmations into a sequence
+        const fullSequence: string[] = [];
+        allAffirmations.forEach(aff => {
+            const textToRepeat = aff.trigger ? `When I ${aff.trigger}, I will ${aff.text}` : aff.text;
+            for (let i = 0; i < aff.repeats; i++) {
+                fullSequence.push(textToRepeat);
+            }
+        });
+
+        setAffirmations(fullSequence);
+        setPhase('active');
+        setCurrentIndex(0);
+        setTimeInCurrent(0);
+        playPeacefulSound();
     };
 
     // Timer logic
@@ -217,11 +283,13 @@ const Affirmations: React.FC = () => {
                             const nextIndex = prevIndex + 1;
                             if (nextIndex >= affirmations.length) {
                                 setPhase('completed');
+                                triggerInteraction('affirmation', 'complete');
+                                updateMascotStreak(true);
                                 return prevIndex;
                             }
                             return nextIndex;
                         });
-                        playGentleChime();
+                        playPeacefulSound();
                         setIsTransitioning(false);
                     }, 500);
                     return 0;
@@ -342,6 +410,100 @@ const Affirmations: React.FC = () => {
                         </div>
                     ))}
                 </div>
+
+                <div style={{ marginTop: '2rem', width: '100%', maxWidth: '500px' }}>
+                    <button
+                        onClick={() => setPhase('manage-personal')}
+                        className="btn-premium btn-premium-secondary"
+                        style={{ width: '100%', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                    >
+                        <Sun size={20} /> Manage Personal Affirmations
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Manage Personal Affirmations
+    if (phase === 'manage-personal') {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem', maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 600 }}>Personal Affirmations</h2>
+
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <input
+                            type="text"
+                            placeholder="I am worthy and capable..."
+                            value={newPersonalText}
+                            onChange={e => setNewPersonalText(e.target.value)}
+                            className="form-input"
+                            style={{ padding: '1rem' }}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Trigger: When I... (optional)"
+                            value={newPersonalTrigger}
+                            onChange={e => setNewPersonalTrigger(e.target.value)}
+                            className="form-input"
+                            style={{ padding: '1rem' }}
+                        />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Repeats: {newPersonalRepeats}</label>
+                            <input
+                                type="range"
+                                min="3"
+                                max="12"
+                                value={newPersonalRepeats}
+                                onChange={e => setNewPersonalRepeats(parseInt(e.target.value))}
+                                style={{ flex: 1 }}
+                            />
+                        </div>
+                        <button
+                            onClick={() => {
+                                if (newPersonalText.trim()) {
+                                    addPersonalAffirmation(newPersonalText.trim(), newPersonalRepeats, newPersonalTrigger.trim() || undefined);
+                                    setNewPersonalText('');
+                                    setNewPersonalTrigger('');
+                                }
+                            }}
+                            className="btn-premium btn-premium-primary"
+                            style={{ padding: '0.8rem' }}
+                        >
+                            <Plus size={18} /> Add Affirmation
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto' }}>
+                        {personalAffirmations.map(aff => (
+                            <div key={aff.id} className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderRadius: '12px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 500 }}>{aff.text}</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                        {aff.trigger ? `When ${aff.trigger}` : 'No trigger'} • {aff.repeats} repeats
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button
+                                        onClick={() => startIndividualAffirmation(aff)}
+                                        style={{ color: 'var(--primary-color)', background: 'none', border: 'none', cursor: 'pointer' }}
+                                        title="Start session with this affirmation"
+                                    >
+                                        <Play size={18} />
+                                    </button>
+                                    <button onClick={() => deletePersonalAffirmation(aff.id)} style={{ color: 'var(--danger-color)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                    <button onClick={resetToThemeSelection} className="btn-premium btn-premium-secondary" style={{ flex: 1, padding: '1rem' }}>Back</button>
+                    <button onClick={startPersonalSession} disabled={personalAffirmations.length === 0} className="btn-premium btn-premium-primary" style={{ flex: 2, padding: '1rem' }}>Start Session</button>
+                </div>
             </div>
         );
     }
@@ -409,10 +571,11 @@ const Affirmations: React.FC = () => {
             padding: '2rem',
             gap: '2rem',
             maxWidth: '700px',
-            margin: '0 auto'
+            margin: '0 auto',
+            height: '100%'
         }}>
             {/* Progress Bar */}
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%', marginBottom: '1rem' }}>
                 <div style={{
                     width: '100%',
                     height: '4px',
@@ -437,42 +600,87 @@ const Affirmations: React.FC = () => {
                 </p>
             </div>
 
-            {/* Affirmation Display */}
+            {/* Scrolling Affirmation Display */}
             <div style={{
-                minHeight: '200px',
+                height: '350px',
+                width: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                textAlign: 'center',
-                padding: '2rem',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                maskImage: 'linear-gradient(to bottom, transparent, black 30%, black 70%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 30%, black 70%, transparent)'
             }}>
-                <p style={{
-                    fontSize: '1.8rem',
-                    lineHeight: '1.8',
-                    color: 'var(--text-primary)',
-                    fontWeight: 400,
-                    opacity: isTransitioning ? 0 : 1,
-                    transform: isTransitioning ? 'translateY(20px)' : 'translateY(0)',
-                    transition: 'opacity 0.5s ease, transform 0.5s ease',
-                    maxWidth: '600px'
+                <div style={{
+                    transform: `translateY(${115 - (currentIndex * 120)}px)`,
+                    transition: 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    position: 'absolute',
+                    top: 0,
+                    width: '100%'
                 }}>
-                    {affirmations[currentIndex]}
-                </p>
+                    {affirmations.map((text, index) => {
+                        const isFocused = index === currentIndex;
+                        const distance = Math.abs(index - currentIndex);
+
+                        return (
+                            <div
+                                key={index}
+                                style={{
+                                    height: '120px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    textAlign: 'center',
+                                    padding: '0 1rem',
+                                    opacity: isFocused ? 1 : Math.max(0, 0.3 - (distance - 1) * 0.1),
+                                    transform: `scale(${isFocused ? 1 : 0.85})`,
+                                    transition: 'opacity 1.5s ease, transform 1.5s ease',
+                                    maxWidth: '600px',
+                                    filter: isFocused ? 'none' : 'blur(1px)'
+                                }}
+                            >
+                                <p style={{
+                                    fontSize: isFocused ? '1.8rem' : '1.4rem',
+                                    lineHeight: '1.6',
+                                    color: 'var(--text-primary)',
+                                    fontWeight: isFocused ? 400 : 300,
+                                    margin: 0
+                                }}>
+                                    {text}
+                                </p>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
 
-            {/* Breathing Indicator */}
-            {phase === 'active' && !isTransitioning && (
-                <div style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: 'var(--primary-color)',
-                    opacity: 0.2,
-                    animation: 'gentlePulse 4s ease-in-out infinite'
-                }} />
-            )}
+            {/* Breathing Indicator and Instructional Text */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                {phase === 'active' && !isTransitioning && (
+                    <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        background: 'var(--primary-color)',
+                        opacity: 0.15,
+                        animation: 'gentlePulse 4s ease-in-out infinite'
+                    }} />
+                )}
+
+                <p style={{
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.9rem',
+                    fontStyle: 'italic',
+                    textAlign: 'center',
+                    opacity: 0.7
+                }}>
+                    Repeat in your head. Feel it. Love yourself.
+                </p>
+            </div>
 
             {/* Controls */}
             <div style={{

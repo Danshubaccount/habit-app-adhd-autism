@@ -35,14 +35,17 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
     };
 
     useEffect(() => {
-        setStoredValue(current => {
-            try {
-                const item = window.localStorage.getItem(key);
-                return item ? JSON.parse(item) : current;
-            } catch (error) {
-                return current;
-            }
-        })
+        const timeout = setTimeout(() => {
+            setStoredValue(current => {
+                try {
+                    const item = window.localStorage.getItem(key);
+                    return item ? JSON.parse(item) : current;
+                } catch {
+                    return current;
+                }
+            });
+        }, 0);
+        return () => clearTimeout(timeout);
     }, [key]); // Re-read if key changes, though usually static.
 
     return [storedValue, setValue];

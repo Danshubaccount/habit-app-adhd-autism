@@ -1,94 +1,106 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { HabitProvider } from './context/HabitContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LoginPage, SignupPage } from './components/AuthPages';
 import './styles/main.css';
 
-import GoalsDashboard from './components/GoalsDashboard';
-import MindfulnessPlaceholder from './components/MindfulnessPlaceholder';
-import Journal from './components/Journal';
-import HomeSelection from './components/HomeSelection';
-
-import homeBg from './assets/home_bg.png';
-import goalsBg from './assets/goals_bg.png';
-import journalBg from './assets/journal_bg.png';
-
-type View = 'home' | 'goals' | 'mindfulness' | 'journal';
+import Home from './pages/Home/Home';
+import Goals from './pages/Goals/Goals';
+import Mindfulness from './pages/Mindfulness/Mindfulness';
+import Journal from './pages/Journal/Journal';
+import LoginPage from './pages/Auth/Login';
+import SignupPage from './pages/Auth/Signup';
+import MascotSidebar from './components/Mascot/MascotSidebar';
+import MascotBuilder from './pages/MascotBuilder/MascotBuilder';
+import { useMascot } from './context/MascotContext';
 
 const AppContent: React.FC = () => {
   const { currentUser } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [currentView, setCurrentView] = useState<View>('home');
+  const { mascot } = useMascot();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    let bgImage = '';
-    switch (currentView) {
-      case 'home':
-        bgImage = `url(${homeBg})`;
-        break;
-      case 'goals':
-        bgImage = `url(${goalsBg})`;
-        break;
-      case 'journal':
-      case 'mindfulness':
-        bgImage = `url(${journalBg})`;
-        break;
-    }
-
-    if (currentUser) {
-      document.body.style.backgroundImage = bgImage;
-      document.body.style.backgroundSize = 'cover';
-      document.body.style.backgroundPosition = 'center';
-      document.body.style.backgroundAttachment = 'fixed';
-      document.body.style.transition = 'background-image 0.5s ease-in-out';
-    } else {
-      document.body.style.backgroundImage = '';
-    }
-
-    return () => {
-      // Cleanup if needed, though for spa usually we just overwrite
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      document.body.style.setProperty('--mouse-x', `${x}%`);
+      document.body.style.setProperty('--mouse-y', `${y}%`);
     };
-  }, [currentView, currentUser]);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    let themeClass = '';
+    const path = location.pathname;
+
+    if (path === '/' || path === '/home') {
+      themeClass = 'theme-home';
+    } else if (path.startsWith('/goals')) {
+      themeClass = 'theme-goals';
+    } else if (path.startsWith('/journal')) {
+      themeClass = 'theme-journal';
+    } else if (path.startsWith('/mindfulness')) {
+      themeClass = 'theme-mindfulness';
+    }
+
+    if (currentUser && themeClass) {
+      document.body.className = themeClass;
+    } else if (!currentUser) {
+      document.body.className = '';
+    }
+  }, [location.pathname, currentUser]);
+
+  // Redirect to Mascot Builder if logged in but no mascot
+  useEffect(() => {
+    if (currentUser && !mascot && location.pathname !== '/mascot-builder') {
+      navigate('/mascot-builder');
+    }
+  }, [currentUser, mascot, location.pathname, navigate]);
 
   if (!currentUser) {
-    // Reset background for auth pages if needed, or keep it simple
-    document.body.style.backgroundImage = '';
-    return isLogin
-      ? <LoginPage onSwitch={() => setIsLogin(false)} />
-      : <SignupPage onSwitch={() => setIsLogin(true)} />;
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
-
-  const renderView = () => {
-    switch (currentView) {
-      case 'goals':
-        return <GoalsDashboard onBack={() => setCurrentView('home')} />;
-      case 'mindfulness':
-        return <MindfulnessPlaceholder onBack={() => setCurrentView('home')} />;
-      case 'journal':
-        return <Journal onBack={() => setCurrentView('home')} />;
-      case 'home':
-      default:
-        return (
-          <HomeSelection
-            onSelectGoals={() => setCurrentView('goals')}
-            onSelectMindfulness={() => setCurrentView('mindfulness')}
-            onSelectJournal={() => setCurrentView('journal')}
-          />
-        );
-    }
-  };
 
   return (
     <HabitProvider>
-      {renderView()}
+      <div className="app-container">
+        <Routes>
+          <Route path="/" element={<Home
+            onSelectGoals={() => navigate('/goals')}
+            onSelectMindfulness={() => navigate('/mindfulness')}
+            onSelectJournal={() => navigate('/journal')}
+          />} />
+          <Route path="/goals" element={<Goals onBack={() => navigate('/')} />} />
+          <Route path="/mindfulness/*" element={<Mindfulness onBack={() => navigate('/')} />} />
+          <Route path="/journal" element={<Journal onBack={() => navigate('/')} />} />
+          <Route path="/mascot-builder" element={<MascotBuilder />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        <MascotSidebar />
+      </div>
     </HabitProvider>
   );
 };
 
+import { MascotProvider } from './context/MascotContext';
+
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <MascotProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </MascotProvider>
     </AuthProvider>
   );
 }

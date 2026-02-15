@@ -9,10 +9,9 @@ interface JournalEntry {
 interface CalendarViewProps {
     entries: JournalEntry[];
     onSelectDate: (date: string) => void;
-    onBack: () => void;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ entries, onSelectDate, onBack }) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ entries, onSelectDate }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const getDaysInMonth = (year: number, month: number) => {
@@ -86,28 +85,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, onSelectDate, onBa
             margin: '0 auto',
             color: 'var(--text-primary)'
         }}>
-            <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', zIndex: 10 }}>
-                <button
-                    onClick={onBack}
-                    style={{
-                        border: 'none',
-                        background: 'var(--card-bg)',
-                        color: 'var(--text-primary)',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '999px',
-                        boxShadow: 'var(--shadow-sm)',
-                        fontSize: '0.9rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                    }}
-                >
-                    ← Back
-                </button>
-            </div>
-
             <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button onClick={handlePrevMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--text-primary)' }}>
