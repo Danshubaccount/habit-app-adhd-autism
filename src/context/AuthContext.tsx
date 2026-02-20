@@ -19,8 +19,16 @@ export const useAuth = () => {
     return context;
 };
 
+const GUEST_USER: User = {
+    id: 'guest',
+    email: 'guest@example.com',
+    name: 'Guest User',
+    age: 0,
+    createdAt: new Date().toISOString()
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(GUEST_USER);
     const [isLoading, setIsLoading] = useState(true);
 
     // Fetch user profile data from public.profiles table
@@ -60,6 +68,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (session?.user) {
                 const profile = await fetchProfile(session.user.id, session.user.email || '');
                 setCurrentUser(profile);
+            } else {
+                setCurrentUser(GUEST_USER);
             }
             setIsLoading(false);
         };
@@ -72,7 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const profile = await fetchProfile(session.user.id, session.user.email || '');
                 setCurrentUser(profile);
             } else {
-                setCurrentUser(null);
+                setCurrentUser(GUEST_USER);
             }
             setIsLoading(false);
         });
@@ -121,7 +131,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const logout = async () => {
         await supabase.auth.signOut();
-        setCurrentUser(null);
+        setCurrentUser(GUEST_USER);
     };
 
     return (
