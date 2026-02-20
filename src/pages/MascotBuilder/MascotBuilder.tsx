@@ -55,7 +55,7 @@ const MascotBuilder: React.FC = () => {
                     "Look after yourself like you would a friend. This is your friend."
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '3rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
                     {/* Preview Panel */}
                     <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem' }}>
                         <div style={{ transform: 'scale(1.5)' }}>
@@ -101,7 +101,7 @@ const MascotBuilder: React.FC = () => {
                         {/* Animal Types */}
                         <div>
                             <h3 style={{ marginBottom: '1rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Choose Animal</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
                                 {ANIMALS.map(animal => (
                                     <button
                                         key={animal.type}
@@ -112,6 +112,8 @@ const MascotBuilder: React.FC = () => {
                                             border: selectedType === animal.type ? '2px solid var(--text-primary)' : '1px solid var(--glass-border)',
                                             cursor: 'pointer',
                                             fontSize: '0.7rem',
+                                            flex: '1 1 auto',
+                                            minWidth: '60px',
                                             background: selectedType === animal.type ? 'rgba(255,255,255,0.2)' : 'transparent',
                                             color: 'var(--text-primary)'
                                         }}
@@ -152,7 +154,7 @@ const MascotBuilder: React.FC = () => {
                         {/* Outfits (MVP placeholder) */}
                         <div>
                             <h3 style={{ marginBottom: '1rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Outfit Style</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem' }}>
                                 {OUTFITS.map(outfit => (
                                     <button
                                         key={outfit.value}
@@ -162,6 +164,8 @@ const MascotBuilder: React.FC = () => {
                                             padding: '0.8rem',
                                             border: selectedOutfit === outfit.value ? '2px solid var(--text-primary)' : '1px solid var(--glass-border)',
                                             cursor: 'pointer',
+                                            flex: '1 1 auto',
+                                            minWidth: '100px',
                                             background: selectedOutfit === outfit.value ? 'rgba(255,255,255,0.2)' : 'transparent',
                                             color: 'var(--text-primary)'
                                         }}
