@@ -48,16 +48,16 @@ const MascotBuilder: React.FC = () => {
     return (
         <CenterColumnLayout onBack={() => navigate('/')} showBackButton={!!mascot}>
             <div style={{ marginTop: 'var(--section-spacing)', width: '100%', maxWidth: '800px' }} className="animate-fade-in">
-                <h1 style={{ textAlign: 'center', marginBottom: '1rem', fontFamily: 'var(--font-serif)' }}>
+                <h1 style={{ textAlign: 'center', marginBottom: '1rem', fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 6vw, 3.2rem)' }}>
                     {mascot ? 'Customize Your Companion' : 'Choose Your Spirit Animal'}
                 </h1>
                 <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '3rem' }}>
                     "Look after yourself like you would a friend. This is your friend."
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3rem', justifyContent: 'center' }}>
                     {/* Preview Panel */}
-                    <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem' }}>
+                    <div className="glass-panel" style={{ flex: '1 1 300px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem' }}>
                         <div style={{ transform: 'scale(1.5)' }}>
                             {/* We hijack the context temporarily for preview or just pass props to Mascot if we modify it to accept direct props */}
                             {/* For now, I'll use a hacky way or just update the Mascot component to accept props */}
@@ -97,7 +97,7 @@ const MascotBuilder: React.FC = () => {
                     </div>
 
                     {/* Selection Panel */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         {/* Animal Types */}
                         <div>
                             <h3 style={{ marginBottom: '1rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Choose Animal</h3>
