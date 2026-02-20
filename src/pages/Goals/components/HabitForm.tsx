@@ -26,7 +26,9 @@ const HabitForm: React.FC = () => {
             reward,
             category,
             frequency,
-            isCritical
+            isCritical,
+            graceDays: 0,
+            scaleLevel: 'standard'
         });
 
         // Reset form

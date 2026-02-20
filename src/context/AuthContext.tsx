@@ -1,13 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { User } from '../types';
-import { db } from '../services/db';
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
     currentUser: User | null;
-    login: (email: string, pass: string) => Promise<boolean>;
-    signup: (email: string, pass: string, name: string, age: number) => Promise<boolean>;
+    login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+    signup: (email: string, pass: string, name: string, age: number) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
+    isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,64 +23,109 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Fetch user profile data from public.profiles table
+    const fetchProfile = async (userId: string, email: string) => {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+            // Fallback user object
+            return {
+                id: userId,
+                email: email,
+                name: 'User',
+                age: 0,
+                createdAt: new Date().toISOString()
+            };
+        }
+
+        return {
+            id: data.id,
+            email: data.email,
+            name: data.name || 'User',
+            age: data.age || 0,
+            createdAt: data.created_at
+        };
+    };
+
     // Load session on mount
     useEffect(() => {
-        const initAuth = () => {
-            const userId = db.getCurrentSession();
-            if (userId) {
-                const user = db.findById(userId);
-                if (user) {
-                    setCurrentUser(user);
-                } else {
-                    // Stale session
-                    db.clearSession();
-                }
+        const initAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (session?.user) {
+                const profile = await fetchProfile(session.user.id, session.user.email || '');
+                setCurrentUser(profile);
             }
             setIsLoading(false);
         };
+
         initAuth();
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (session?.user) {
+                const profile = await fetchProfile(session.user.id, session.user.email || '');
+                setCurrentUser(profile);
+            } else {
+                setCurrentUser(null);
+            }
+            setIsLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     const login = async (email: string, pass: string) => {
-        const user = db.findByEmail(email);
-        if (user && user.password === pass) {
-            db.setCurrentSession(user.id);
-            setCurrentUser(user);
-            return true;
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password: pass
+            });
+            if (error) throw error;
+            return { success: true };
+        } catch (error: any) {
+            console.error('Login failed:', error);
+            return { success: false, error: error.message };
         }
-        return false;
     };
 
     const signup = async (email: string, pass: string, name: string, age: number) => {
-        if (db.findByEmail(email)) {
-            return false; // Email exists
-        }
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password: pass,
+                options: {
+                    data: {
+                        full_name: name,
+                        age: age
+                    }
+                }
+            });
+            if (error) throw error;
 
-        const newUser: User = {
-            id: crypto.randomUUID(),
-            email,
-            password: pass,
-            name,
-            age,
-            createdAt: new Date().toISOString()
-        };
+            console.log("Signup returned data:", data);
 
-        const success = db.saveUser(newUser);
-        if (success) {
-            db.setCurrentSession(newUser.id);
-            setCurrentUser(newUser);
-            return true;
+            // Supabase trigger will handle adding the user to `profiles`.
+            // The session might be automatically initiated via `onAuthStateChange`.
+            return { success: true };
+        } catch (error: any) {
+            console.error('Signup failed:', error);
+            return { success: false, error: error.message };
         }
-        return false;
     };
 
-    const logout = () => {
-        db.clearSession();
+    const logout = async () => {
+        await supabase.auth.signOut();
         setCurrentUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ currentUser, login, signup, logout }}>
+        <AuthContext.Provider value={{ currentUser, login, signup, logout, isLoading }}>
             {!isLoading && children}
         </AuthContext.Provider>
     );

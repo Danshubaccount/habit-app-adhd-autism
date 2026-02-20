@@ -1,9 +1,10 @@
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { Wind, Scan, Sun, Sparkles } from 'lucide-react';
+import { Wind, Scan, Sun, Sparkles, Brain } from 'lucide-react';
 import BoxBreathing from './BoxBreathing/BoxBreathing';
 import BodyScanMeditation from './BodyScan/BodyScan';
 import Affirmations from './Affirmations/Affirmations';
 import MindfulMoments from './MindfulMoments';
+import Hypnosis from './Hypnosis/Hypnosis';
 import CenterColumnLayout from '../../components/CenterColumnLayout';
 
 interface MindfulnessPlaceholderProps {
@@ -116,6 +117,28 @@ const Mindfulness: React.FC<MindfulnessPlaceholderProps> = ({ onBack }) => {
                                     Gentle tips and practices for every situation
                                 </p>
                             </div>
+
+                            {/* Hypnosis Card */}
+                            <div
+                                onClick={() => navigate('hypnosis')}
+                                className="glass-panel"
+                                style={{
+                                    padding: '2.5rem 2rem',
+                                    cursor: 'pointer',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '1rem'
+                                }}
+                            >
+                                <Brain size={48} strokeWidth={1.5} color="var(--primary-text)" style={{ filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.1))' }} />
+                                <h2 style={{ fontSize: '1.6rem', marginBottom: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-sans)' }}>Hypnosis</h2>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6' }}>
+                                    Personalized intake and therapeutic hypnosis script generation
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </CenterColumnLayout>
@@ -148,6 +171,14 @@ const Mindfulness: React.FC<MindfulnessPlaceholderProps> = ({ onBack }) => {
                 <CenterColumnLayout onBack={() => navigate('/mindfulness')} backText="Back">
                     <div style={{ marginTop: 'var(--section-spacing)', width: '100%' }}>
                         <MindfulMoments />
+                    </div>
+                </CenterColumnLayout>
+            } />
+            <Route path="hypnosis" element={
+                <CenterColumnLayout onBack={() => navigate('/mindfulness')} backText="Back">
+                    <div style={{ marginTop: 'var(--section-spacing)', width: '100%' }}>
+                        <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Therapeutic Hypnosis</h1>
+                        <Hypnosis />
                     </div>
                 </CenterColumnLayout>
             } />

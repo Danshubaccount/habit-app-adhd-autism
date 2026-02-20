@@ -11,11 +11,11 @@ const LoginPage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const success = await login(email, pass);
-        if (success) {
+        const result = await login(email, pass);
+        if (result.success) {
             navigate('/');
         } else {
-            setError('Invalid credentials');
+            setError(result.error || 'Invalid credentials');
         }
     };
 

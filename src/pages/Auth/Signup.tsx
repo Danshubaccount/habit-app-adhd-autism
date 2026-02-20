@@ -14,11 +14,11 @@ const SignupPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!age) return;
-        const success = await signup(email, pass, name, Number(age));
-        if (success) {
+        const result = await signup(email, pass, name, Number(age));
+        if (result.success) {
             navigate('/');
         } else {
-            setError('Email already exists');
+            setError(result.error || 'Signup failed. Please try again.');
         }
     };
 

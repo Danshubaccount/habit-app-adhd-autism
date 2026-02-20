@@ -16,7 +16,7 @@ export interface ElevenLabsOptions {
 }
 
 const DEFAULT_OPTIONS: ElevenLabsOptions = {
-    stability: 0.95,
+    stability: 1.0, // eleven_v3 requires exactly 0.0 (Creative), 0.5 (Natural), or 1.0 (Robust)
     similarity_boost: 0.70,
     style: 0.0,
     use_speaker_boost: true,
@@ -62,7 +62,7 @@ export class ElevenLabsService {
                 },
                 body: JSON.stringify({
                     text: processedText,
-                    model_id: 'eleven_multilingual_v2',
+                    model_id: 'eleven_v3',
                     voice_settings: fullOptions,
                 }),
             });
