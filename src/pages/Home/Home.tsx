@@ -1,157 +1,156 @@
-import React from 'react';
-import { Sparkles, Target, BookText } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import './Home.css';
 
 interface HomeSelectionProps {
-    onSelectGoals: () => void;
-    onSelectMindfulness: () => void;
-    onSelectJournal: () => void;
+  onSelectGoals: () => void;
+  onSelectMindfulness: () => void;
+  onSelectJournal: () => void;
 }
 
-const Home: React.FC<HomeSelectionProps> = ({ onSelectGoals, onSelectMindfulness, onSelectJournal }) => {
-    return (
-        <div className="center-column-layout" style={{
-            minHeight: '100vh',
-            justifyContent: 'center',
-            padding: '2rem',
-            position: 'relative',
-            zIndex: 1
-        }}>
-            {/* Dynamic Background Overlay */}
-            <div style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.5) 100%)',
-                zIndex: -1
-            }} />
+const Home: React.FC<HomeSelectionProps> = ({
+  onSelectGoals,
+  onSelectMindfulness,
+  onSelectJournal,
+}) => {
+  const blobRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-            <div style={{ position: 'relative', zIndex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {/* Buddha Logo */}
-                <img
-                    src="/buddha-logo.png"
-                    alt="Mindfulness Logo"
-                    style={{
-                        width: '180px',
-                        height: '180px',
-                        marginBottom: '1rem',
-                        opacity: 0.95,
-                        borderRadius: '24px',
-                        background: 'rgba(255, 255, 255, 0.25)',
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.4)',
-                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
-                        padding: '1rem'
-                    }}
-                />
-
-                {/* Two-Line Heading - Premium Type */}
-                <div style={{
-                    textAlign: 'center',
-                    marginBottom: '5rem'
-                }}>
-                    <h1 className="animate-title" style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontSize: 'clamp(3rem, 10vw, 5.5rem)',
-                        fontWeight: 800,
-                        color: 'var(--text-primary)',
-                        letterSpacing: '-0.03em',
-                        lineHeight: 1,
-                        margin: 0
-                    }}>
-                        Grow Mindfully
-                    </h1>
-                    <div className="animate-subtitle" style={{
-                        fontFamily: 'var(--font-accent)',
-                        fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
-                        fontWeight: 400,
-                        fontStyle: 'italic',
-                        color: 'var(--primary-text)',
-                        marginTop: '0.75rem',
-                        letterSpacing: '0.2em',
-                        textTransform: 'uppercase',
-                        opacity: 0.9
-                    }}>
-                        Each Day
-                    </div>
-                </div>
-
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '2.5rem',
-                    maxWidth: '1100px',
-                    width: '100%',
-                    padding: '0 1rem'
-                }}>
-                    <button
-                        onClick={onSelectMindfulness}
-                        className="glass-panel"
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '3.5rem 2rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            gap: '1.5rem',
-                            textAlign: 'center'
-                        }}
-                    >
-                        <Sparkles size={64} strokeWidth={1} color="var(--primary-text)" style={{ filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.1))' }} />
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, fontFamily: 'var(--font-sans)' }}>Mindfulness</h2>
-                        <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '1.05rem', lineHeight: 1.5 }}>
-                            Peace & Tranquility
-                        </p>
-                    </button>
-
-                    <button
-                        onClick={onSelectGoals}
-                        className="glass-panel"
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '3.5rem 2rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            gap: '1.5rem',
-                            textAlign: 'center'
-                        }}
-                    >
-                        <Target size={64} strokeWidth={1} color="var(--primary-text)" style={{ filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.1))' }} />
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, fontFamily: 'var(--font-sans)' }}>Goals</h2>
-                        <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '1.05rem', lineHeight: 1.5 }}>
-                            Growth & Tracking
-                        </p>
-                    </button>
-
-                    <button
-                        onClick={onSelectJournal}
-                        className="glass-panel"
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '3.5rem 2rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            gap: '1.5rem',
-                            textAlign: 'center'
-                        }}
-                    >
-                        <BookText size={64} strokeWidth={1} color="var(--primary-text)" style={{ filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.1))' }} />
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, fontFamily: 'var(--font-sans)' }}>Journal</h2>
-                        <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '1.05rem', lineHeight: 1.5 }}>
-                            Reflection & Gratitude
-                        </p>
-                    </button>
-                </div>
-            </div>
-        </div>
+  useEffect(() => {
+    const desktopPointerMedia = window.matchMedia(
+      '(min-width: 760px) and (hover: hover) and (pointer: fine)'
     );
+    const reduceMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    let rafId = 0;
+    let active = false;
+    let currentX = 0;
+    let currentY = 0;
+    let targetX = 0;
+    let targetY = 0;
+
+    const factors = [
+      { x: 9, y: 7 },
+      { x: 6, y: -8 },
+      { x: -7, y: 5 },
+      { x: -10, y: -6 },
+    ];
+
+    const applyOffsets = () => {
+      blobRefs.current.forEach((blob, index) => {
+        if (!blob) return;
+        const factor = factors[index] ?? { x: 8, y: 8 };
+        blob.style.setProperty('--mx', `${(currentX * factor.x).toFixed(2)}px`);
+        blob.style.setProperty('--my', `${(currentY * factor.y).toFixed(2)}px`);
+      });
+    };
+
+    const animate = () => {
+      currentX += (targetX - currentX) * 0.09;
+      currentY += (targetY - currentY) * 0.09;
+      applyOffsets();
+
+      if (Math.abs(targetX - currentX) > 0.001 || Math.abs(targetY - currentY) > 0.001) {
+        rafId = window.requestAnimationFrame(animate);
+      } else {
+        rafId = 0;
+      }
+    };
+
+    const startLoop = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(animate);
+    };
+
+    const onMouseMove = (event: MouseEvent) => {
+      const nx = event.clientX / window.innerWidth - 0.5;
+      const ny = event.clientY / window.innerHeight - 0.5;
+      targetX = nx;
+      targetY = ny;
+      startLoop();
+    };
+
+    const onMouseLeave = () => {
+      targetX = 0;
+      targetY = 0;
+      startLoop();
+    };
+
+    const enable = () => {
+      if (active) return;
+      active = true;
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+      window.addEventListener('mouseleave', onMouseLeave, { passive: true });
+    };
+
+    const disable = () => {
+      if (!active) return;
+      active = false;
+      targetX = 0;
+      targetY = 0;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseleave', onMouseLeave);
+      startLoop();
+    };
+
+    const syncMode = () => {
+      if (desktopPointerMedia.matches && !reduceMotionMedia.matches) {
+        enable();
+      } else {
+        disable();
+      }
+    };
+
+    syncMode();
+    desktopPointerMedia.addEventListener('change', syncMode);
+    reduceMotionMedia.addEventListener('change', syncMode);
+
+    return () => {
+      desktopPointerMedia.removeEventListener('change', syncMode);
+      reduceMotionMedia.removeEventListener('change', syncMode);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseleave', onMouseLeave);
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="live-glass-home">
+      <div className="live-glass-bg" aria-hidden="true">
+        <div className="live-blob live-blob-1" ref={(el) => { blobRefs.current[0] = el; }} />
+        <div className="live-blob live-blob-2" ref={(el) => { blobRefs.current[1] = el; }} />
+        <div className="live-blob live-blob-3" ref={(el) => { blobRefs.current[2] = el; }} />
+        <div className="live-blob live-blob-4" ref={(el) => { blobRefs.current[3] = el; }} />
+      </div>
+
+      <main className="live-glass-card" aria-label="Live glass home panel">
+        <p className="live-eyebrow">Live Focus Mode</p>
+        <h1>Build momentum with one tiny action.</h1>
+        <p className="live-copy">
+          Keep your next step obvious and your energy steady with an intentional,
+          low-friction interface.
+        </p>
+
+        <div className="live-actions">
+          <button
+            type="button"
+            className="live-primary-btn"
+            onClick={onSelectMindfulness}
+          >
+            Start Mindfulness Sprint
+          </button>
+          <div className="live-secondary-row" aria-label="Quick links">
+            <button type="button" className="live-secondary-btn" onClick={onSelectGoals}>
+              Goals
+            </button>
+            <button type="button" className="live-secondary-btn" onClick={onSelectJournal}>
+              Journal
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default Home;
