@@ -97,6 +97,13 @@ body {
   box-sizing: border-box;
 }
 
+.app-container--full-bleed {
+  max-width: 100%;
+  padding: 0;
+  min-height: 100dvh;
+  align-items: stretch;
+}
+
 .center-column-layout {
   width: 100%;
   max-width: var(--max-content-width);

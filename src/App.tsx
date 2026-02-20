@@ -21,6 +21,7 @@ const AppContent: React.FC = () => {
   const { mascot } = useMascot();
   const location = useLocation();
   const navigate = useNavigate();
+  const isMascotBuilderRoute = location.pathname.startsWith('/mascot-builder');
 
   const hideAbstractBackground = VIDEO_BACKGROUND_ROUTES.some((route) =>
     location.pathname.startsWith(route)
@@ -67,7 +68,7 @@ const AppContent: React.FC = () => {
       )}
       <div className="route-layer">
         <HabitProvider>
-          <div className="app-container">
+          <div className={`app-container ${isMascotBuilderRoute ? 'app-container--full-bleed' : ''}`}>
             <Routes>
               <Route path="/" element={<Home
                 onSelectGoals={() => navigate('/goals')}
@@ -80,7 +81,7 @@ const AppContent: React.FC = () => {
               <Route path="/mascot-builder" element={<MascotBuilder />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            <MascotSidebar />
+            {!isMascotBuilderRoute && <MascotSidebar />}
           </div>
         </HabitProvider>
       </div>
