@@ -208,7 +208,7 @@ const Mindfulness: React.FC<MindfulnessPlaceholderProps> = ({ onBack }) => {
             <Route path="releasing-memories" element={
                 <CenterColumnLayout onBack={() => navigate('/mindfulness')} backText="Back">
                     <div style={{ marginTop: 'var(--section-spacing)', width: '100%' }}>
-                        <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', textAlign: 'center' }}>Releasing Bad Memories</h1>
+                        <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', marginBottom: '2rem', textAlign: 'center' }}>Releasing Bad Memories</h1>
                         <ReleasingBadMemories />
                     </div>
                 </CenterColumnLayout>

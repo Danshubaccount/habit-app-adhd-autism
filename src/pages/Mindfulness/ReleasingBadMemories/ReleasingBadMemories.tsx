@@ -229,7 +229,7 @@ const ReleasingBadMemories: React.FC = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '2.5rem',
+            padding: 'clamp(1rem, 3vw, 2.5rem)',
             gap: '2.5rem',
             maxWidth: '1000px',
             width: '95%',
@@ -242,7 +242,7 @@ const ReleasingBadMemories: React.FC = () => {
                 className="glass-panel"
                 style={{
                     width: '100%',
-                    padding: '3rem',
+                    padding: 'clamp(1.5rem, 5vw, 3rem)',
                     borderRadius: '24px',
                     display: 'flex',
                     flexDirection: 'column',
@@ -286,7 +286,7 @@ const ReleasingBadMemories: React.FC = () => {
                 <div
                     ref={containerRef}
                     style={{
-                        height: '350px',
+                        height: 'clamp(250px, 50vh, 350px)',
                         width: '100%',
                         display: 'flex',
                         flexDirection: 'column',
@@ -327,7 +327,7 @@ const ReleasingBadMemories: React.FC = () => {
                                 >
                                     {lines.map((line, lIndex) => (
                                         <p key={lIndex} style={{
-                                            fontSize: isLast ? '1.6rem' : '1.2rem',
+                                            fontSize: isLast ? 'clamp(1.2rem, 5vw, 1.6rem)' : 'clamp(1rem, 4vw, 1.2rem)',
                                             lineHeight: '1.8',
                                             color: isLast ? 'var(--text-primary)' : 'rgba(255,255,255,0.2)',
                                             fontWeight: isLast ? 400 : 300,
@@ -354,7 +354,7 @@ const ReleasingBadMemories: React.FC = () => {
                     {phase === 'idle' ? (
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
                             gap: '1.5rem',
                             width: '100%',
                             maxWidth: '600px'
