@@ -60,7 +60,7 @@ body {
     radial-gradient(circle at 74% 8%, rgba(135, 176, 247, 0.8) 0%, rgba(135, 176, 247, 0) 62%),
     radial-gradient(circle at 10% 78%, rgba(255, 90, 188, 0.62) 0%, rgba(255, 90, 188, 0) 56%),
     linear-gradient(155deg, #98a8e8 0%, #78b2ee 38%, #8f7cd9 100%);
-  animation: abstractFlowBase 34s ease-in-out infinite alternate;
+  animation: abstractFlowBase 19s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .abstract-flow-bg__layer--orb {
@@ -76,7 +76,7 @@ body {
     radial-gradient(circle at 18% 72%, rgba(84, 193, 255, 0.85) 0%, rgba(84, 193, 255, 0) 44%),
     radial-gradient(circle at 54% 28%, rgba(114, 68, 220, 0.92) 0%, rgba(114, 68, 220, 0) 60%),
     radial-gradient(circle at 64% 54%, rgba(237, 84, 203, 0.78) 0%, rgba(237, 84, 203, 0) 72%);
-  animation: abstractFlowOrb 24s ease-in-out infinite alternate;
+  animation: abstractFlowOrb 13s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .abstract-flow-bg__layer--pink {
@@ -89,7 +89,7 @@ body {
   border-radius: 50%;
   filter: blur(85px);
   background: radial-gradient(circle, rgba(239, 82, 204, 0.62) 0%, rgba(239, 82, 204, 0) 70%);
-  animation: abstractFlowPink 29s ease-in-out infinite alternate;
+  animation: abstractFlowPink 15s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .abstract-flow-bg__layer--warm {
@@ -102,7 +102,7 @@ body {
   border-radius: 50%;
   filter: blur(90px);
   background: radial-gradient(circle, rgba(255, 145, 92, 0.58) 0%, rgba(255, 145, 92, 0) 70%);
-  animation: abstractFlowWarm 32s ease-in-out infinite alternate;
+  animation: abstractFlowWarm 17s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
 
 .route-layer {
@@ -115,45 +115,65 @@ body {
 
 @keyframes abstractFlowBase {
   0% {
-    transform: translate3d(-1.8%, -1.2%, 0) scale(1);
+    transform: translate3d(-2.4%, -1.6%, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(1.8%, -0.8%, 0) scale(1.045);
   }
 
   100% {
-    transform: translate3d(2.1%, 1.4%, 0) scale(1.04);
+    transform: translate3d(2.6%, 1.8%, 0) scale(1.02);
   }
 }
 
 @keyframes abstractFlowOrb {
   0% {
-    transform: translate3d(-50%, 0, 0) scale(1);
+    transform: translate3d(-50%, 0, 0) scale(1) rotate(-2deg);
+  }
+
+  25% {
+    transform: translate3d(-47.5%, -2.2%, 0) scale(1.045) rotate(0deg);
   }
 
   50% {
-    transform: translate3d(-48%, -2.5%, 0) scale(1.03);
+    transform: translate3d(-50.8%, -1.2%, 0) scale(1.01) rotate(1.5deg);
+  }
+
+  75% {
+    transform: translate3d(-52.4%, 1.9%, 0) scale(0.985) rotate(0deg);
   }
 
   100% {
-    transform: translate3d(-52%, 1.8%, 0) scale(0.98);
+    transform: translate3d(-50%, 0.3%, 0) scale(1) rotate(-2deg);
   }
 }
 
 @keyframes abstractFlowPink {
   0% {
-    transform: translate3d(-2%, 1%, 0) scale(1);
+    transform: translate3d(-2.8%, 1.2%, 0) scale(1);
+  }
+
+  40% {
+    transform: translate3d(1.4%, -1.9%, 0) scale(1.12);
   }
 
   100% {
-    transform: translate3d(2%, -2%, 0) scale(1.1);
+    transform: translate3d(-1.1%, 0.7%, 0) scale(1.03);
   }
 }
 
 @keyframes abstractFlowWarm {
   0% {
-    transform: translate3d(1.5%, -0.5%, 0) scale(1);
+    transform: translate3d(1.9%, -0.8%, 0) scale(1);
+  }
+
+  45% {
+    transform: translate3d(-2.7%, 1.9%, 0) scale(1.11);
   }
 
   100% {
-    transform: translate3d(-2.5%, 1.8%, 0) scale(1.08);
+    transform: translate3d(0.8%, -0.5%, 0) scale(1.02);
   }
 }
 
