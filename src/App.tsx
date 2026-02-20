@@ -14,44 +14,17 @@ import MascotSidebar from './components/Mascot/MascotSidebar';
 import MascotBuilder from './pages/MascotBuilder/MascotBuilder';
 import { useMascot } from './context/MascotContext';
 
+const VIDEO_BACKGROUND_ROUTES = ['/mindfulness/releasing-memories'];
+
 const AppContent: React.FC = () => {
   const { currentUser } = useAuth();
   const { mascot } = useMascot();
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth) * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      document.body.style.setProperty('--mouse-x', `${x}%`);
-      document.body.style.setProperty('--mouse-y', `${y}%`);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    let themeClass = '';
-    const path = location.pathname;
-
-    if (path === '/' || path === '/home') {
-      themeClass = 'theme-home';
-    } else if (path.startsWith('/goals')) {
-      themeClass = 'theme-goals';
-    } else if (path.startsWith('/journal')) {
-      themeClass = 'theme-journal';
-    } else if (path.startsWith('/mindfulness')) {
-      themeClass = 'theme-mindfulness';
-    }
-
-    if (currentUser && themeClass) {
-      document.body.className = themeClass;
-    } else if (!currentUser) {
-      document.body.className = '';
-    }
-  }, [location.pathname, currentUser]);
+  const hideAbstractBackground = VIDEO_BACKGROUND_ROUTES.some((route) =>
+    location.pathname.startsWith(route)
+  );
 
   // Redirect to Mascot Builder if logged in but no mascot
   useEffect(() => {
@@ -62,32 +35,56 @@ const AppContent: React.FC = () => {
 
   if (!currentUser) {
     return (
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+      <>
+        {!hideAbstractBackground && (
+          <div className="abstract-flow-bg" aria-hidden="true">
+            <div className="abstract-flow-bg__layer abstract-flow-bg__layer--base" />
+            <div className="abstract-flow-bg__layer abstract-flow-bg__layer--orb" />
+            <div className="abstract-flow-bg__layer abstract-flow-bg__layer--pink" />
+            <div className="abstract-flow-bg__layer abstract-flow-bg__layer--warm" />
+          </div>
+        )}
+        <div className="route-layer">
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </div>
+      </>
     );
   }
 
   return (
-    <HabitProvider>
-      <div className="app-container">
-        <Routes>
-          <Route path="/" element={<Home
-            onSelectGoals={() => navigate('/goals')}
-            onSelectMindfulness={() => navigate('/mindfulness')}
-            onSelectJournal={() => navigate('/journal')}
-          />} />
-          <Route path="/goals" element={<Goals onBack={() => navigate('/')} />} />
-          <Route path="/mindfulness/*" element={<Mindfulness onBack={() => navigate('/')} />} />
-          <Route path="/journal" element={<Journal onBack={() => navigate('/')} />} />
-          <Route path="/mascot-builder" element={<MascotBuilder />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <MascotSidebar />
+    <>
+      {!hideAbstractBackground && (
+        <div className="abstract-flow-bg" aria-hidden="true">
+          <div className="abstract-flow-bg__layer abstract-flow-bg__layer--base" />
+          <div className="abstract-flow-bg__layer abstract-flow-bg__layer--orb" />
+          <div className="abstract-flow-bg__layer abstract-flow-bg__layer--pink" />
+          <div className="abstract-flow-bg__layer abstract-flow-bg__layer--warm" />
+        </div>
+      )}
+      <div className="route-layer">
+        <HabitProvider>
+          <div className="app-container">
+            <Routes>
+              <Route path="/" element={<Home
+                onSelectGoals={() => navigate('/goals')}
+                onSelectMindfulness={() => navigate('/mindfulness')}
+                onSelectJournal={() => navigate('/journal')}
+              />} />
+              <Route path="/goals" element={<Goals onBack={() => navigate('/')} />} />
+              <Route path="/mindfulness/*" element={<Mindfulness onBack={() => navigate('/')} />} />
+              <Route path="/journal" element={<Journal onBack={() => navigate('/')} />} />
+              <Route path="/mascot-builder" element={<MascotBuilder />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <MascotSidebar />
+          </div>
+        </HabitProvider>
       </div>
-    </HabitProvider>
+    </>
   );
 };
 
