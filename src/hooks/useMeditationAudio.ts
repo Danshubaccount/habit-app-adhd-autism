@@ -5,6 +5,7 @@ export interface MeditationAudioControls {
     isAmbientEnabled: boolean;
     voiceVolume: number;
     ambientVolume: number;
+    playbackRate: number;
     currentTime: number;
     duration: number;
     play: (voiceUrl: string) => void;
@@ -13,6 +14,7 @@ export interface MeditationAudioControls {
     toggleAmbient: () => void;
     setVoiceVolume: (vol: number) => void;
     setAmbientVolume: (vol: number) => void;
+    setPlaybackRate: (rate: number) => void;
 }
 
 export const useMeditationAudio = (ambientUrl?: string): MeditationAudioControls => {
@@ -20,6 +22,7 @@ export const useMeditationAudio = (ambientUrl?: string): MeditationAudioControls
     const [isAmbientEnabled, setIsAmbientEnabled] = useState(true);
     const [voiceVolume, setVoiceVolume] = useState(1.0);
     const [ambientVolume, setAmbientVolume] = useState(0.25); // Recommended 20-30%
+    const [playbackRate, setPlaybackRate] = useState(1);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
 
@@ -103,12 +106,16 @@ export const useMeditationAudio = (ambientUrl?: string): MeditationAudioControls
         if (voiceAudioRef.current.src !== voiceUrl) {
             voiceAudioRef.current.src = voiceUrl;
         }
+        voiceAudioRef.current.playbackRate = playbackRate;
+        if ('preservesPitch' in voiceAudioRef.current) {
+            (voiceAudioRef.current as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = true;
+        }
 
         voiceAudioRef.current.play().then(() => {
             setIsPlaying(true);
             fadeInAmbient();
         }).catch(e => console.error("Error playing voice:", e));
-    }, [fadeInAmbient]);
+    }, [fadeInAmbient, playbackRate]);
 
     const pause = useCallback(() => {
         if (voiceAudioRef.current) {
@@ -145,6 +152,12 @@ export const useMeditationAudio = (ambientUrl?: string): MeditationAudioControls
     }, [voiceVolume]);
 
     useEffect(() => {
+        if (voiceAudioRef.current) {
+            voiceAudioRef.current.playbackRate = playbackRate;
+        }
+    }, [playbackRate]);
+
+    useEffect(() => {
         if (ambientAudioRef.current && !fadeIntervalRef.current) {
             ambientAudioRef.current.volume = isAmbientEnabled ? ambientVolume : 0;
         }
@@ -155,6 +168,7 @@ export const useMeditationAudio = (ambientUrl?: string): MeditationAudioControls
         isAmbientEnabled,
         voiceVolume,
         ambientVolume,
+        playbackRate,
         currentTime,
         duration,
         play,
@@ -163,5 +177,6 @@ export const useMeditationAudio = (ambientUrl?: string): MeditationAudioControls
         toggleAmbient,
         setVoiceVolume,
         setAmbientVolume,
+        setPlaybackRate,
     };
 };

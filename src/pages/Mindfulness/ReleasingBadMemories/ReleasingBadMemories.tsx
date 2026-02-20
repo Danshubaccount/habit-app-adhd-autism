@@ -7,6 +7,49 @@ import { Play, Timer } from 'lucide-react';
 
 type MeditationPhase = 'idle' | 'meditation' | 'paused' | 'video';
 
+const REPLAY_STORAGE_KEY = 'releasing-memories-replay-count';
+const VIDEO_RESTART_DELAY_MS = 900;
+const meditationPaceOptions = [1, 1.5, 2] as const;
+const affirmationMessages = [
+    'See yourself gently placing each released memory into the fire - and watch it transform into light.',
+    'Each memory you release becomes light. You are lighter now.',
+    'Release. Transform. Rise.'
+] as const;
+
+const getReplayCounterPrefix = (replayCount: number): string | null => {
+    if (replayCount <= 0) return null;
+    if (replayCount === 1) return 'You have chosen to release again';
+    if (replayCount === 2) return 'You are practicing release';
+    return 'Each repetition strengthens your healing';
+};
+
+interface AffirmationOverlayProps {
+    isVisible: boolean;
+    message: string;
+    replayCount: number;
+}
+
+const AffirmationOverlay: React.FC<AffirmationOverlayProps> = ({ isVisible, message, replayCount }) => {
+    const replayCounterPrefix = getReplayCounterPrefix(replayCount);
+
+    return (
+        <div className={`rmb-affirmation-overlay ${isVisible ? 'is-visible' : ''}`} aria-live="polite">
+            <div className="rmb-affirmation-overlay-inner">
+                <p className="rmb-affirmation-message">{message}</p>
+                {replayCounterPrefix && (
+                    <p className="rmb-replay-counter">
+                        {replayCounterPrefix} -{' '}
+                        <span key={replayCount} className="rmb-replay-count-number">
+                            {replayCount}
+                        </span>{' '}
+                        {replayCount === 1 ? 'time.' : 'times.'}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const scriptBlocks = [
     { text: "Take a slow breath in...\nAnd gently close your eyes.", duration: 8 },
     { text: "Imagine yourself sitting quietly in a peaceful forest at twilight.\nThe air is soft. The world is still.", duration: 10 },
@@ -38,6 +81,16 @@ const ReleasingBadMemories: React.FC = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const replayTimeoutRef = useRef<number | null>(null);
+    const [isVideoReplayTransition, setIsVideoReplayTransition] = useState(false);
+    const [affirmationIndex, setAffirmationIndex] = useState(0);
+    const [meditationSpeed, setMeditationSpeed] = useState(1);
+    const [replayCount, setReplayCount] = useState<number>(() => {
+        if (typeof window === 'undefined') return 0;
+        const storedCount = window.localStorage.getItem(REPLAY_STORAGE_KEY);
+        const parsedCount = Number.parseInt(storedCount ?? '', 10);
+        return Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 0;
+    });
 
     const OCEAN_WAVES_URL = 'https://assets.mixkit.co/sfx/preview/mixkit-beach-waves-loop-1196.mp3';
 
@@ -47,6 +100,7 @@ const ReleasingBadMemories: React.FC = () => {
         duration,
         play: playAudio,
         pause: pauseAudio,
+        setPlaybackRate,
     } = useMeditationAudio(OCEAN_WAVES_URL);
 
     useEffect(() => {
@@ -99,11 +153,21 @@ const ReleasingBadMemories: React.FC = () => {
     };
 
     const resetMeditation = () => {
+        if (replayTimeoutRef.current) {
+            clearTimeout(replayTimeoutRef.current);
+            replayTimeoutRef.current = null;
+        }
+        if (videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.currentTime = 0;
+        }
         setPhase('idle');
         setTimeInPhase(0);
         setScriptHistory(['A guided journey to release bad memories and let go of the past.']);
         pausedTimeRef.current = 0;
         setIsListenMode(false);
+        setIsVideoReplayTransition(false);
+        setAffirmationIndex(0);
         pauseAudio();
     };
 
@@ -146,20 +210,21 @@ const ReleasingBadMemories: React.FC = () => {
 
         timerRef.current = window.setInterval(() => {
             setTimeInPhase(prev => {
-                if (prev >= totalMeditationDuration) {
+                const nextTime = prev + (meditationSpeed * 0.25);
+                if (nextTime >= totalMeditationDuration) {
                     finishMeditation();
-                    return prev;
+                    return totalMeditationDuration;
                 }
-                return prev + 1;
+                return nextTime;
             });
-        }, 1000);
+        }, 250);
 
         return () => {
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
         };
-    }, [phase, isListenMode]);
+    }, [phase, isListenMode, meditationSpeed]);
 
     const getScript = React.useCallback((): string => {
         if (phase === 'idle') return 'A guided journey to release what no longer serves you.';
@@ -206,9 +271,51 @@ const ReleasingBadMemories: React.FC = () => {
     // Wait until video phase to explicitly play it (in some browsers standard autoPlay works when muted but programmatic play is safer)
     useEffect(() => {
         if (phase === 'video' && videoRef.current) {
+            setIsVideoReplayTransition(false);
+            videoRef.current.currentTime = 0;
             videoRef.current.play().catch(e => console.error("Video playback failed:", e));
         }
     }, [phase]);
+
+    useEffect(() => {
+        setPlaybackRate(meditationSpeed);
+    }, [meditationSpeed, setPlaybackRate]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem(REPLAY_STORAGE_KEY, String(replayCount));
+        }
+    }, [replayCount]);
+
+    useEffect(() => {
+        return () => {
+            if (replayTimeoutRef.current) {
+                clearTimeout(replayTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleVideoEnded = () => {
+        setIsVideoReplayTransition(true);
+        if (replayTimeoutRef.current) {
+            clearTimeout(replayTimeoutRef.current);
+            replayTimeoutRef.current = null;
+        }
+
+        replayTimeoutRef.current = window.setTimeout(() => {
+            setReplayCount(previous => previous + 1);
+            setAffirmationIndex(previous => (previous + 1) % affirmationMessages.length);
+
+            if (videoRef.current) {
+                videoRef.current.currentTime = 0;
+                videoRef.current.play().catch(e => console.error("Video replay failed:", e));
+            }
+            setIsVideoReplayTransition(false);
+        }, VIDEO_RESTART_DELAY_MS);
+    };
+
+    const activeAffirmationMessage = affirmationMessages[affirmationIndex];
+    const isAffirmationVisible = phase === 'video' && !isVideoReplayTransition;
 
 
     const getProgress = (): number => {
@@ -218,8 +325,9 @@ const ReleasingBadMemories: React.FC = () => {
     };
 
     const formatTime = (seconds: number): string => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
+        const roundedSeconds = Math.max(0, Math.floor(seconds));
+        const mins = Math.floor(roundedSeconds / 60);
+        const secs = roundedSeconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
@@ -281,6 +389,42 @@ const ReleasingBadMemories: React.FC = () => {
                         </p>
                     </div>
                 )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.65rem', width: '100%' }}>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.02em' }}>
+                        Session pace
+                    </p>
+                    <div style={{
+                        display: 'inline-flex',
+                        gap: '0.4rem',
+                        padding: '0.3rem',
+                        borderRadius: '999px',
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.14)'
+                    }}>
+                        {meditationPaceOptions.map((pace) => {
+                            const isSelected = pace === meditationSpeed;
+                            return (
+                                <button
+                                    key={pace}
+                                    onClick={() => setMeditationSpeed(pace)}
+                                    style={{
+                                        border: 'none',
+                                        borderRadius: '999px',
+                                        padding: '0.45rem 0.85rem',
+                                        fontSize: '0.82rem',
+                                        background: isSelected ? 'rgba(var(--primary-color-rgb), 0.9)' : 'transparent',
+                                        color: isSelected ? '#111' : 'rgba(255,255,255,0.88)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    {pace}x
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
 
                 {/* Text Scrolling UI */}
                 <div
@@ -527,12 +671,18 @@ const ReleasingBadMemories: React.FC = () => {
                     src="/videos/releasing-bad-memories.mp4"
                     muted // Highly recommended to avoid browser autoplay blocking
                     playsInline
-                    loop
+                    onEnded={handleVideoEnded}
+                    onPlay={() => setIsVideoReplayTransition(false)}
                     style={{
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover'
                     }}
+                />
+                <AffirmationOverlay
+                    isVisible={isAffirmationVisible}
+                    message={activeAffirmationMessage}
+                    replayCount={replayCount}
                 />
                 {phase === 'video' && (
                     <button
@@ -569,6 +719,76 @@ const ReleasingBadMemories: React.FC = () => {
                 }
                 @keyframes spin {
                     to { transform: rotate(360deg); }
+                }
+                .rmb-affirmation-overlay {
+                    position: absolute;
+                    top: clamp(1.25rem, 10vh, 7rem);
+                    left: 50%;
+                    transform: translateX(-50%) translateY(10px);
+                    width: min(92vw, 700px);
+                    padding: 0 1rem;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+                    z-index: 2;
+                }
+                .rmb-affirmation-overlay.is-visible {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+                .rmb-affirmation-overlay-inner {
+                    border-radius: 24px;
+                    padding: clamp(0.8rem, 2.2vw, 1.35rem) clamp(0.95rem, 3vw, 1.8rem);
+                    text-align: center;
+                    background: linear-gradient(140deg, rgba(253, 248, 239, 0.2), rgba(245, 236, 223, 0.12));
+                    border: 1px solid rgba(255, 245, 231, 0.26);
+                    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+                    backdrop-filter: blur(14px);
+                    -webkit-backdrop-filter: blur(14px);
+                    animation: affirmationFloat 7s ease-in-out infinite;
+                }
+                .rmb-affirmation-message {
+                    margin: 0;
+                    color: rgba(255, 251, 244, 0.96);
+                    font-size: clamp(1rem, 2.4vw, 1.35rem);
+                    line-height: 1.6;
+                    letter-spacing: 0.01em;
+                    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
+                }
+                .rmb-replay-counter {
+                    margin: 0.65rem 0 0;
+                    color: rgba(250, 240, 230, 0.9);
+                    font-size: clamp(0.82rem, 2vw, 0.98rem);
+                    line-height: 1.45;
+                    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+                }
+                .rmb-replay-count-number {
+                    display: inline-block;
+                    min-width: 1.1ch;
+                    font-weight: 600;
+                    animation: replayCountPulse 0.65s ease-out;
+                }
+                @keyframes affirmationFloat {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-4px); }
+                }
+                @keyframes replayCountPulse {
+                    0% { opacity: 0; transform: translateY(3px); }
+                    100% { opacity: 1; transform: translateY(0); }
+                }
+                @media (max-width: 640px) {
+                    .rmb-affirmation-overlay {
+                        top: clamp(0.8rem, 7vh, 3rem);
+                    }
+                    .rmb-affirmation-overlay-inner {
+                        border-radius: 20px;
+                    }
+                    .rmb-affirmation-message {
+                        line-height: 1.5;
+                    }
+                    .rmb-replay-counter {
+                        margin-top: 0.55rem;
+                    }
                 }
             `}</style>
         </div>
