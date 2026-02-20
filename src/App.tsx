@@ -14,7 +14,7 @@ import MascotSidebar from './components/Mascot/MascotSidebar';
 import MascotBuilder from './pages/MascotBuilder/MascotBuilder';
 import { useMascot } from './context/MascotContext';
 
-const VIDEO_BACKGROUND_ROUTES = ['/mindfulness/releasing-memories'];
+const VIDEO_BACKGROUND_ROUTES = ['/mindfulness/releasing-memories', '/mascot-builder'];
 
 const AppContent: React.FC = () => {
   const { currentUser } = useAuth();
