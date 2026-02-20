@@ -18,7 +18,7 @@ const CenterColumnLayout: React.FC<CenterColumnLayoutProps> = ({
     style = {}
 }) => {
     return (
-        <div className={`center-column-layout ${className}`} style={{ minHeight: '100vh', position: 'relative', ...style }}>
+        <div className={`center-column-layout ${className}`} style={{ minHeight: '100vh', position: 'relative', maxWidth: '100vw', overflowX: 'hidden', ...style }}>
             {showBackButton && onBack && (
                 <div style={{ position: 'fixed', top: '1.5rem', left: '1.5rem', zIndex: 100 }}>
                     <button
@@ -40,7 +40,7 @@ const CenterColumnLayout: React.FC<CenterColumnLayoutProps> = ({
                     </button>
                 </div>
             )}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden', boxSizing: 'border-box' }}>
                 {children}
             </div>
         </div>

@@ -47,7 +47,7 @@ const MascotBuilder: React.FC = () => {
 
     return (
         <CenterColumnLayout onBack={() => navigate('/')} showBackButton={!!mascot}>
-            <div style={{ marginTop: 'var(--section-spacing)', width: '100%', maxWidth: '800px' }} className="animate-fade-in">
+            <div style={{ marginTop: 'var(--section-spacing)', width: '100%', maxWidth: '800px', overflow: 'hidden', boxSizing: 'border-box', padding: '0 1rem' }} className="animate-fade-in">
                 <h1 style={{ textAlign: 'center', marginBottom: '1rem', fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 6vw, 3.2rem)' }}>
                     {mascot ? 'Customize Your Companion' : 'Choose Your Spirit Animal'}
                 </h1>
@@ -55,10 +55,10 @@ const MascotBuilder: React.FC = () => {
                     "Look after yourself like you would a friend. This is your friend."
                 </p>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3rem', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center', width: '100%' }}>
                     {/* Preview Panel */}
-                    <div className="glass-panel" style={{ flex: '1 1 300px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem' }}>
-                        <div style={{ transform: 'scale(1.5)' }}>
+                    <div className="glass-panel" style={{ flex: '1 1 250px', maxWidth: '100%', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', boxSizing: 'border-box' }}>
+                        <div style={{ transform: 'scale(1.3)', maxWidth: '100%' }}>
                             {/* We hijack the context temporarily for preview or just pass props to Mascot if we modify it to accept direct props */}
                             {/* For now, I'll use a hacky way or just update the Mascot component to accept props */}
                             <div style={{
@@ -97,7 +97,7 @@ const MascotBuilder: React.FC = () => {
                     </div>
 
                     {/* Selection Panel */}
-                    <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div style={{ flex: '1 1 250px', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: '2rem', boxSizing: 'border-box' }}>
                         {/* Animal Types */}
                         <div>
                             <h3 style={{ marginBottom: '1rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Choose Animal</h3>
