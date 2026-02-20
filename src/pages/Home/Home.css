@@ -1,7 +1,7 @@
 .live-glass-home {
-  --glass-surface: rgba(255, 255, 255, 0.08);
-  --main-text: rgba(255, 255, 255, 0.96);
-  --muted-text: rgba(255, 255, 255, 0.78);
+  --glass-surface: rgba(245, 245, 250, 0.2);
+  --main-text: #2f2e2e;
+  --muted-text: rgba(47, 46, 46, 0.78);
 
   position: relative;
   width: 100%;
@@ -24,11 +24,11 @@
   padding: clamp(1.15rem, 3.5vw, 2rem);
   border-radius: 26px;
   background: var(--glass-surface);
-  border: 1px solid transparent;
+  border: 1px solid rgba(200, 200, 220, 0.3);
   color: var(--main-text);
-  backdrop-filter: blur(60px) saturate(145%);
-  -webkit-backdrop-filter: blur(60px) saturate(145%);
-  box-shadow: 0 24px 60px rgba(8, 2, 18, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(45px);
+  -webkit-backdrop-filter: blur(45px);
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.05);
 }
 
 .live-glass-card::before {
@@ -64,7 +64,7 @@
   font-size: clamp(1.5rem, 5vw, 2.5rem);
   line-height: 1.04;
   letter-spacing: 0.01em;
-  color: var(--main-text);
+  color: #353535;
 }
 
 .live-copy {
@@ -94,17 +94,17 @@
 .live-primary-btn {
   min-height: 3.2rem;
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(200, 200, 220, 0.3);
   color: #fff;
-  background: linear-gradient(120deg, rgba(138, 43, 226, 0.9), rgba(255, 20, 147, 0.88));
-  box-shadow: 0 14px 32px rgba(10, 2, 25, 0.35);
+  background: linear-gradient(120deg, #6B705C, #A5A58D);
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.05);
   font-size: 1rem;
   font-weight: 600;
 }
 
 .live-primary-btn:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 16px 34px rgba(10, 2, 25, 0.42);
+  filter: brightness(1.04);
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.08);
 }
 
 .live-primary-btn:active,
@@ -120,11 +120,11 @@
 
 .live-secondary-btn {
   min-height: 2.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(200, 200, 220, 0.3);
   color: var(--main-text);
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(45px);
+  -webkit-backdrop-filter: blur(45px);
   font-size: 0.95rem;
   font-weight: 600;
 }

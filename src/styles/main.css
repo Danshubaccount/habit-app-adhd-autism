@@ -1,43 +1,37 @@
 :root {
   /* Premium Design System - HSL for better control */
-  --p-h: 12;
-  /* Primary Hue (Warm Coral) */
-  --p-s: 90%;
+  --p-h: 73;
+  /* Primary Hue (Muted Earth) */
+  --p-s: 12%;
   /* Primary Saturation */
-  --p-l: 72%;
+  --p-l: 46%;
   /* Primary Lightness */
 
-  --primary-color: hsl(var(--p-h), var(--p-s), var(--p-l));
-  --primary-hover: hsl(var(--p-h), var(--p-s), calc(var(--p-l) - 8%));
-  --primary-text: hsl(var(--p-h), var(--p-s), calc(var(--p-l) - 25%));
-  /* Darker coral for text accessibility */
-  --primary-soft: hsl(var(--p-h), var(--p-s), 96%);
+  --primary-color: #6B705C;
+  --primary-hover: #5d6250;
+  --primary-text: #505443;
+  --primary-soft: rgba(165, 165, 141, 0.26);
 
-  --secondary-color: #F8FAFC;
-  --accent-color: #4FD1C5;
-  /* Keeping teal for now */
+  --secondary-color: #F3F1EC;
+  --accent-color: #84A59D;
 
-  --text-primary: #1E293B;
-  /* Slate 800 */
-  --text-secondary: #64748B;
-  /* Slate 500 */
-  --text-muted: #94A3B8;
-  /* Slate 400 */
+  --text-primary: #2F2E2E;
+  --text-secondary: #5f6360;
+  --text-muted: #7a7d79;
 
-  --bg-color: #FDFBF7;
+  --bg-color: #e9e4db;
   --card-bg: rgba(255, 255, 255, 0.82);
-  --border-color: rgba(226, 232, 240, 0.8);
-  /* Slate 200 soft */
+  --border-color: rgba(200, 200, 220, 0.3);
 
-  --success-color: #10B981;
-  --danger-color: #EF4444;
-  --warning-color: #F59E0B;
+  --success-color: #84A59D;
+  --danger-color: #B56576;
+  --warning-color: #A98467;
 
   /* Elevation System */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 8px 24px rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 10px 32px rgba(255, 255, 255, 0.05);
+  --shadow-lg: 0 12px 36px rgba(255, 255, 255, 0.06);
+  --shadow-inner: inset 0 2px 8px rgba(255, 255, 255, 0.08);
 
   /* Radius System */
   --radius-lg: 24px;
@@ -48,10 +42,10 @@
   --radius: var(--radius-md);
 
   /* Glassmorphism System */
-  --glass-bg: linear-gradient(140deg, rgba(152, 176, 242, 0.34), rgba(178, 152, 241, 0.27) 52%, rgba(254, 178, 149, 0.2));
-  --glass-border: rgba(255, 255, 255, 0.34);
-  --glass-blur: 30px;
-  --glass-shadow: 0 20px 50px rgba(13, 22, 52, 0.16);
+  --glass-bg: rgba(245, 245, 250, 0.2);
+  --glass-border: rgba(200, 200, 220, 0.3);
+  --glass-blur: 45px;
+  --glass-shadow: 0 10px 40px rgba(255, 255, 255, 0.05);
   --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 
   /* Typography */
@@ -61,17 +55,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary-color: #FF8E72;
-    --primary-hover: #E67A5F;
-    --primary-text: #FFB3A1;
-    /* Lighter for dark mode contrast */
-    --secondary-color: #2D3748;
-    --text-primary: #F7FAFC;
-    --text-secondary: #A0AEC0;
-    --bg-color: #1A202C;
-    --bg-color: #1A202C;
-    --card-bg: #2D3748;
-    --border-color: #4A5568;
+    --primary-color: #7A806C;
+    --primary-hover: #696f5d;
+    --primary-text: #dfdbc4;
+    --secondary-color: #D9D7D0;
+    --text-primary: #2F2E2E;
+    --text-secondary: #636664;
+    --bg-color: #d6d1c8;
+    --card-bg: rgba(245, 245, 250, 0.2);
+    --border-color: rgba(200, 200, 220, 0.3);
   }
 }
 
@@ -158,29 +150,28 @@ body {
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow), var(--glass-inset);
   border-radius: var(--radius-lg);
-  transition: transform 0.28s ease, box-shadow 0.3s ease, filter 0.3s ease;
+  transition: transform 0.28s ease, box-shadow 5s ease, border-color 5s ease, background-color 5s ease, filter 0.3s ease;
 }
 
 .glass-panel:hover {
   transform: translateY(-1px);
-  filter: brightness(1.04);
-  box-shadow: 0 24px 56px rgba(13, 22, 52, 0.18), var(--glass-inset);
+  filter: brightness(1.02);
+  box-shadow: 0 10px 42px rgba(255, 255, 255, 0.08), var(--glass-inset);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --glass-bg: linear-gradient(140deg, rgba(71, 94, 163, 0.55), rgba(96, 79, 158, 0.46));
-    /* Slate 900 soft */
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --secondary-color: #1E293B;
-    --text-primary: #F8FAFC;
-    --text-secondary: #CBD5E1;
-    --bg-color: #0F172A;
-    --border-color: rgba(51, 65, 85, 0.8);
+    --glass-bg: rgba(245, 245, 250, 0.2);
+    --glass-border: rgba(200, 200, 220, 0.3);
+    --secondary-color: #E5E2D9;
+    --text-primary: #2F2E2E;
+    --text-secondary: #646866;
+    --bg-color: #d6d1c8;
+    --border-color: rgba(200, 200, 220, 0.3);
   }
 
   .glass-panel:hover {
-    filter: brightness(1.08);
+    filter: brightness(1.02);
   }
 }
 
@@ -238,19 +229,19 @@ button:focus-visible {
 }
 
 .btn-premium-primary {
-  background: linear-gradient(135deg, var(--primary-color), hsl(var(--p-h), var(--p-s), calc(var(--p-l) - 5%)));
+  background: linear-gradient(135deg, #6B705C, #A5A58D);
   color: white;
-  box-shadow: 0 4px 14px 0 hsla(var(--p-h), var(--p-s), var(--p-l), 0.39);
+  box-shadow: 0 10px 36px rgba(255, 255, 255, 0.05);
 }
 
 .btn-premium-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.23);
-  filter: brightness(1.05);
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.07);
+  filter: brightness(1.04);
 }
 
 .btn-premium-secondary {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
@@ -258,7 +249,7 @@ button:focus-visible {
 }
 
 .btn-premium-secondary:hover {
-  background: var(--primary-soft);
+  background: rgba(255, 255, 255, 0.16);
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
@@ -332,7 +323,7 @@ h1 {
 
 .habit-item:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--glass-shadow);
 }
 
 .habit-item--completed {
@@ -660,26 +651,26 @@ input:checked+.slider:before {
 }
 
 .habit-tag.health {
-  background-color: #FED7D7;
-  color: #9B2C2C;
+  background-color: rgba(163, 177, 138, 0.25);
+  color: #4e5a45;
 }
 
 .habit-tag.work {
-  background-color: #C3DAFE;
-  color: #434190;
+  background-color: rgba(74, 87, 89, 0.2);
+  color: #3e494a;
 }
 
 .habit-tag.mindfulness {
-  background-color: #E9D8FD;
-  color: #6B46C1;
+  background-color: rgba(144, 110, 136, 0.22);
+  color: #644e5f;
 }
 
 .habit-tag.social {
-  background-color: #FEEBC8;
-  color: #9C4221;
+  background-color: rgba(221, 190, 169, 0.28);
+  color: #866b57;
 }
 
 .habit-tag.other {
-  background-color: #E2E8F0;
-  color: #2D3748;
+  background-color: rgba(200, 200, 220, 0.28);
+  color: #555457;
 }
