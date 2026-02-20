@@ -76,33 +76,25 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries, onSelectDate }) =>
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
     return (
-        <div className="animate-fade-in" style={{
-            background: 'var(--card-bg)',
-            padding: '2rem',
-            borderRadius: '24px',
-            boxShadow: 'var(--shadow-md)',
-            maxWidth: '100%',
-            margin: '0 auto',
-            color: 'var(--text-primary)'
-        }}>
-            <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button onClick={handlePrevMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--text-primary)' }}>
+        <div className="glass-panel journal-calendar-panel animate-fade-in">
+            <header className="journal-calendar-header">
+                <div className="journal-calendar-nav">
+                    <button onClick={handlePrevMonth} className="journal-calendar-arrow">
                         ‹
                     </button>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, minWidth: '140px', textAlign: 'center' }}>
+                    <h2 className="journal-calendar-title">
                         {monthNames[month]} <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>{year}</span>
                     </h2>
-                    <button onClick={handleNextMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--text-primary)' }}>
+                    <button onClick={handleNextMonth} className="journal-calendar-arrow">
                         ›
                     </button>
                 </div>
-                <div style={{ width: '80px' }}></div> {/* Spacer for alignment */}
+                <div style={{ width: '80px' }}></div>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '1rem' }}>
+            <div className="journal-calendar-weekdays">
                 {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(day => (
-                    <div key={day} style={{ textAlign: 'center', fontWeight: 700, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                    <div key={day} className="journal-calendar-weekday">
                         {day}
                     </div>
                 ))}
