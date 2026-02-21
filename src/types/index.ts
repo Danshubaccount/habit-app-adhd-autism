@@ -4,7 +4,7 @@ export type MascotType = 'puppy' | 'kitten' | 'bird' | 'fox' | 'bunny';
 
 export interface MascotCustomization {
   color: string;
-  outfit: string;
+  outfit?: string;
   accessory?: string;
 }
 

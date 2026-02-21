@@ -23,27 +23,19 @@ const COLORS = [
   { value: '#3C3C3E', name: 'Charcoal' },
 ];
 
-const OUTFITS = [
-  { value: 'none', label: 'Natural' },
-  { value: 'scarf', label: 'Scarf' },
-  { value: 'hat', label: 'Tiny Hat' },
-  { value: 'bow', label: 'Bow Tie' },
-];
-
 const MascotBuilder: React.FC = () => {
   const navigate = useNavigate();
   const { mascot, setMascot } = useMascot();
 
   const [selectedType, setSelectedType] = useState<MascotType>(mascot?.type || 'puppy');
   const [selectedColor, setSelectedColor] = useState(mascot?.customization.color || COLORS[0].value);
-  const [selectedOutfit, setSelectedOutfit] = useState(mascot?.customization.outfit || 'none');
   const [name, setName] = useState(mascot?.name || '');
 
   const canSubmit = name.trim().length > 0;
 
   const handleSave = () => {
     if (!canSubmit) return;
-    setMascot(selectedType, { color: selectedColor, outfit: selectedOutfit }, name.trim());
+    setMascot(selectedType, { color: selectedColor }, name.trim());
     navigate('/');
   };
 
@@ -80,7 +72,6 @@ const MascotBuilder: React.FC = () => {
               <Mascot
                 type={selectedType}
                 color={selectedColor}
-                outfit={selectedOutfit}
                 currentEmotion="calm"
                 size={185}
               />
@@ -129,22 +120,6 @@ const MascotBuilder: React.FC = () => {
                       aria-hidden="true"
                     />
                     {color.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="control-group">
-              <p className="group-label">Outfit</p>
-              <div className="pill-row">
-                {OUTFITS.map((outfit) => (
-                  <button
-                    key={outfit.value}
-                    type="button"
-                    className={`pill-toggle ${selectedOutfit === outfit.value ? 'is-selected' : ''}`}
-                    onClick={() => setSelectedOutfit(outfit.value)}
-                  >
-                    {outfit.label}
                   </button>
                 ))}
               </div>
