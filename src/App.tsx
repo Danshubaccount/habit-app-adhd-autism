@@ -29,8 +29,11 @@ const AppContent: React.FC = () => {
   );
 
   // Redirect to Mascot Builder if logged in but no mascot
+  // Exclude certain routes from the redirect
+  const MASCOT_BYPASS_ROUTES = ['/mascot-builder', '/videos'];
   useEffect(() => {
-    if (currentUser && !mascot && location.pathname !== '/mascot-builder') {
+    const isBypassed = MASCOT_BYPASS_ROUTES.some((r) => location.pathname.startsWith(r));
+    if (currentUser && !mascot && !isBypassed) {
       navigate('/mascot-builder');
     }
   }, [currentUser, mascot, location.pathname, navigate]);
