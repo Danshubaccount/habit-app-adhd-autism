@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Live Glass UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --indigo: #2e004f;
+        --electric: #8a2be2;
+        --sunset: #ff7f50;
+        --rose: #ff1493;
+        --surface: rgba(255, 255, 255, 0.08);
+        --text-main: rgba(255, 255, 255, 0.95);
+        --text-muted: rgba(255, 255, 255, 0.76);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: "Manrope", "Segoe UI", sans-serif;
+        color: var(--text-main);
+        background:
+          radial-gradient(circle at 15% 20%, rgba(138, 43, 226, 0.45), transparent 40%),
+          radial-gradient(circle at 80% 80%, rgba(255, 20, 147, 0.32), transparent 46%),
+          linear-gradient(140deg, #170027 5%, #2e004f 58%, #240040 100%);
+      }
+
+      .app {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        padding: 1rem 1rem calc(9svh + env(safe-area-inset-bottom));
+        isolation: isolate;
+      }
+
+      .blob-field {
+        position: fixed;
+        inset: -25vmax;
+        filter: blur(90px) saturate(125%);
+        pointer-events: none;
+      }
+
+      .blob {
+        position: absolute;
+        width: clamp(13rem, 34vw, 25rem);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        will-change: transform;
+      }
+
+      .blob-core {
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        will-change: transform;
+        transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
+      }
+
+      .blob:nth-child(1) {
+        left: 10%;
+        top: 14%;
+        animation: drift-a 20s ease-in-out infinite alternate;
+      }
+
+      .blob:nth-child(1) .blob-core {
+        background: color-mix(in srgb, var(--electric), white 10%);
+      }
+
+      .blob:nth-child(2) {
+        right: 12%;
+        top: 6%;
+        animation: drift-b 23s ease-in-out infinite alternate;
+      }
+
+      .blob:nth-child(2) .blob-core {
+        background: color-mix(in srgb, var(--sunset), white 6%);
+      }
+
+      .blob:nth-child(3) {
+        left: 12%;
+        bottom: 0%;
+        animation: drift-c 26s ease-in-out infinite alternate;
+      }
+
+      .blob:nth-child(3) .blob-core {
+        background: color-mix(in srgb, var(--rose), white 4%);
+      }
+
+      .blob:nth-child(4) {
+        right: 9%;
+        bottom: 11%;
+        animation: drift-d 22s ease-in-out infinite alternate;
+      }
+
+      .blob:nth-child(4) .blob-core {
+        background: color-mix(in srgb, var(--indigo), var(--electric) 45%);
+      }
+
+      .glass-card {
+        position: relative;
+        width: min(100%, 28.125rem);
+        padding: 1.35rem;
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(60px) saturate(140%);
+        -webkit-backdrop-filter: blur(60px) saturate(140%);
+        box-shadow: 0 24px 70px rgba(8, 3, 22, 0.42);
+      }
+
+      .glass-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(140deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.08) 55%, transparent 100%);
+        -webkit-mask:
+          linear-gradient(#000 0 0) content-box,
+          linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        font-weight: 600;
+        line-height: 1.08;
+        letter-spacing: 0.01em;
+      }
+
+      p {
+        margin: 0.85rem 0 1.35rem;
+        line-height: 1.55;
+        font-size: clamp(0.95rem, 2.8vw, 1.05rem);
+        color: var(--text-muted);
+      }
+
+      .action {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.9rem 1rem;
+        font-size: clamp(0.95rem, 2.8vw, 1rem);
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: #ffffff;
+        background: linear-gradient(120deg, color-mix(in srgb, var(--electric), black 12%), color-mix(in srgb, var(--rose), var(--sunset) 35%));
+        box-shadow: 0 12px 30px rgba(26, 7, 38, 0.32);
+        cursor: pointer;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 34px rgba(28, 8, 42, 0.36);
+      }
+
+      .action:active {
+        transform: translateY(1px) scale(0.995);
+      }
+
+      .status {
+        margin-top: 0.85rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.68);
+      }
+
+      @keyframes drift-a {
+        0% {
+          transform: translate3d(-5vw, -2vh, 0) scale(0.96);
+        }
+        100% {
+          transform: translate3d(6vw, 4vh, 0) scale(1.06);
+        }
+      }
+
+      @keyframes drift-b {
+        0% {
+          transform: translate3d(4vw, -3vh, 0) scale(1.04);
+        }
+        100% {
+          transform: translate3d(-6vw, 5vh, 0) scale(0.95);
+        }
+      }
+
+      @keyframes drift-c {
+        0% {
+          transform: translate3d(-3vw, 4vh, 0) scale(1);
+        }
+        100% {
+          transform: translate3d(7vw, -5vh, 0) scale(1.08);
+        }
+      }
+
+      @keyframes drift-d {
+        0% {
+          transform: translate3d(5vw, 2vh, 0) scale(0.94);
+        }
+        100% {
+          transform: translate3d(-4vw, -4vh, 0) scale(1.05);
+        }
+      }
+
+      @media (min-width: 768px) {
+        .app {
+          align-items: center;
+          padding: 2rem;
+        }
+
+        .glass-card {
+          padding: 1.7rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .blob {
+          animation: none;
+        }
+
+        .action {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blob-field" aria-hidden="true">
+      <div class="blob"><div class="blob-core"></div></div>
+      <div class="blob"><div class="blob-core"></div></div>
+      <div class="blob"><div class="blob-core"></div></div>
+      <div class="blob"><div class="blob-core"></div></div>
+    </div>
+
+    <main class="app">
+      <section class="glass-card" role="region" aria-label="Live Glass panel">
+        <h1>Live Glass Interface</h1>
+        <p>
+          Responsive floating glass panel with GPU-accelerated color field, tuned for mobile thumb reach and desktop depth.
+        </p>
+        <button class="action" type="button" id="pulseAction">Start Pulse</button>
+        <div class="status" id="pulseState">State: Idle</div>
+      </section>
+    </main>
+
+    <script>
+      const button = document.getElementById("pulseAction");
+      const state = document.getElementById("pulseState");
+      const blobs = Array.from(document.querySelectorAll(".blob-core"));
+      const desktopQuery = window.matchMedia("(min-width: 768px) and (pointer: fine)");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      let pulseOn = false;
+      button.addEventListener("click", () => {
+        pulseOn = !pulseOn;
+        button.textContent = pulseOn ? "Stop Pulse" : "Start Pulse";
+        state.textContent = pulseOn ? "State: Active" : "State: Idle";
+      });
+
+      let targetX = 0;
+      let targetY = 0;
+      let currentX = 0;
+      let currentY = 0;
+      let raf = null;
+
+      function animateDepth() {
+        currentX += (targetX - currentX) * 0.08;
+        currentY += (targetY - currentY) * 0.08;
+
+        blobs.forEach((blob, index) => {
+          const strength = 6 + index * 4;
+          blob.style.setProperty("--mx", `${(currentX * strength).toFixed(2)}px`);
+          blob.style.setProperty("--my", `${(currentY * strength).toFixed(2)}px`);
+        });
+
+        raf = requestAnimationFrame(animateDepth);
+      }
+
+      function onPointerMove(event) {
+        const nx = event.clientX / window.innerWidth - 0.5;
+        const ny = event.clientY / window.innerHeight - 0.5;
+        targetX = nx;
+        targetY = ny;
+      }
+
+      function resetDepth() {
+        targetX = 0;
+        targetY = 0;
+      }
+
+      function bindDesktopDepth() {
+        if (!desktopQuery.matches || reduceMotion.matches) {
+          window.removeEventListener("mousemove", onPointerMove);
+          window.removeEventListener("mouseleave", resetDepth);
+          if (raf) {
+            cancelAnimationFrame(raf);
+            raf = null;
+          }
+          blobs.forEach((blob) => {
+            blob.style.setProperty("--mx", "0px");
+            blob.style.setProperty("--my", "0px");
+          });
+          return;
+        }
+
+        window.addEventListener("mousemove", onPointerMove, { passive: true });
+        window.addEventListener("mouseleave", resetDepth, { passive: true });
+        if (!raf) raf = requestAnimationFrame(animateDepth);
+      }
+
+      desktopQuery.addEventListener("change", bindDesktopDepth);
+      reduceMotion.addEventListener("change", bindDesktopDepth);
+      bindDesktopDepth();
+    </script>
+  </body>
+</html>
