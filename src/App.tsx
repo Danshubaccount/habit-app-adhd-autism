@@ -12,6 +12,7 @@ import LoginPage from './pages/Auth/Login';
 import SignupPage from './pages/Auth/Signup';
 import MascotSidebar from './components/Mascot/MascotSidebar';
 import MascotBuilder from './pages/MascotBuilder/MascotBuilder';
+import VideoHub from './pages/Videos/VideoHub';
 import { useMascot } from './context/MascotContext';
 
 const VIDEO_BACKGROUND_ROUTES = ['/mindfulness/releasing-memories', '/mascot-builder'];
@@ -79,6 +80,7 @@ const AppContent: React.FC = () => {
               <Route path="/mindfulness/*" element={<Mindfulness onBack={() => navigate('/')} />} />
               <Route path="/journal" element={<Journal onBack={() => navigate('/')} />} />
               <Route path="/mascot-builder" element={<MascotBuilder />} />
+              <Route path="/videos" element={<VideoHub onBack={() => navigate('/')} />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             {!isMascotBuilderRoute && <MascotSidebar />}
